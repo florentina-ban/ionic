@@ -1,0 +1,14 @@
+#recipeList{
+    display: inline-block;
+    width: 40%;
+    height: auto;
+}
+#editRecipe{
+    display: inline-block;
+    width: 40%;
+    height: auto;
+    float: right;
+}
+#recipeList:hover{
+    cursor: pointer;
+}
