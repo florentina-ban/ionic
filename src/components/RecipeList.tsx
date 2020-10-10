@@ -1,14 +1,25 @@
 import React, { useState } from 'react';
-import { IonCard, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonLabel, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import Recipe from './Recipe';
 import './recipeList.css';
+import { RouteComponentProps } from 'react-router';
+import RecipeProps from '../interfaces/RecipeProps';
 
+const recipesProvider = () => {
+    var recipeList: RecipeProps[]   
+    recipeList = [ 
+        { id: 1, name: "Banana bread", text: "descriptionBanana", likes: 2},
+        { id: 2, name: "Pizza", text: "descriptionPizza", likes: 2},
+        { id: 3, name: "Icecream", text: "descriptionIcecrea", likes: 2},
+        { id: 4, name: "Chocolate", text: "descriptionChocolate", likes: 20}
+    ];
+    return recipeList;
+   }
+   
 
-const RecipeList: React.FC = () =>  {
+const RecipeList: React.FC<RouteComponentProps> = ({history}) =>  {
     const [state, setRecipes] = useState({ 
-        recipes: [{name:"Banana bread", id:1, text:"description1", likes:0},
-        {name:"Cheese cake", id:2, text:"description2", likes:0},
-        {name:"Sarmale", id:3, text:"description3", likes:0}], selected: 1});
+        recipes: recipesProvider(), selected: 1});
 
     const addRecipe = () => {
         const {recipes, selected} = state;
@@ -23,12 +34,20 @@ const RecipeList: React.FC = () =>  {
     }
     const { recipes } = state;
     return (  
-        <IonCard id="recipeList">
-           {recipes.map(({id, text, name, likes}) => 
-              <Recipe id={id} name={name} text={text} likes={likes} />
-            )}
-       
-        </IonCard>
+        <IonPage>
+            <IonHeader>
+                <IonToolbar>
+                  <IonTitle>Cool Recipies App</IonTitle>
+                </IonToolbar>
+            </IonHeader>
+            <IonContent>  
+                <IonCard id="recipeList">
+                    {recipes.map(({id, text, name, likes}) => 
+                    <Recipe key={id} id={id} name={name} text={text} likes={likes} editRecipe={id => history.push(`/item/${id}`)}/>
+                    )} 
+                </IonCard>
+            </IonContent>
+        </IonPage>
     );
 }
 export default RecipeList;

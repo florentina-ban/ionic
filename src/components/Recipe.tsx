@@ -1,27 +1,26 @@
 import { IonFabButton, IonIcon, IonItem, IonLabel } from '@ionic/react';
-import { stat } from 'fs';
 import { thumbsUp } from 'ionicons/icons';
 import React, { useState } from 'react';
-import RecipeProps from '../interfaces/RecipeProps';
+import RecipePropsExt from '../interfaces/RecipePropsExt';
 
+const Recipe: React.FC<RecipePropsExt> = (props) => {
 
-const Recipe: React.FC<RecipeProps> = (props) => {
-
-    const [state, setState] = useState<RecipeProps>(props);
+    const [state, setState] = useState<RecipePropsExt>(props);
 
     const addLike = () => {
         const { likes } = state;
         const likeNo = likes + 1;
         setState({...state, likes: likeNo});
     }
-    const {name, text, likes} = state;
+    const {id, name, text, likes} = state;
 
-    const changeSelected = () => {
-        
+    const onEditRecipe = () => {
+        const { editRecipe } = state;
+        editRecipe(id);
     }
   return (    
     <div>
-        <IonItem onClick={changeSelected}>
+        <IonItem onClick={onEditRecipe}>
           <IonLabel>{name}</IonLabel>
           <IonLabel>{text}</IonLabel>
           <IonLabel>{likes}</IonLabel>

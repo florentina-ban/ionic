@@ -21,13 +21,14 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import Container1 from './pages/Container1';
+import { RecipeList, EditRecipe } from './components';
 
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
-        <Route path="/home" component={Container1} exact={true} />
+        <Route path="/home" component={RecipeList} exact={true} />
+        <Route path="/edit/:id" component={EditRecipe} exact={true} />
         <Route exact path="/" render={() => <Redirect to="/home" />} />
       </IonRouterOutlet>
     </IonReactRouter>
