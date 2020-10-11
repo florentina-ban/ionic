@@ -5,16 +5,16 @@ import RecipePropsRoute from '../interfaces/RecipePropsRoute';
 import { getLogger } from '../core';
 
 const recipeProvider = (id: number) => {
-    return (id === 1) ? { id: 1, name: "Banana bread", text: "descriptionBanana", likes: 2} :
-        (id === 2) ? { id: 2, name: "Pizza", text: "descriptionPizza", likes: 2} :
-        (id === 3) ? { id: 3, name: "Icecream", text: "descriptionIcecrea", likes: 2} : 
-        { id: 4, name: "Chocolate", text: "descriptionChocolate", likes: 20};
+    return (id === 1) ? { id: 1, name: "Banana bread",origin: "Romania", triedIt:true, date: new Date('2020-10-11'),  text: "descriptionBanana", likes: 2} :
+        (id === 2) ? { id: 2, name: "Pizza", origin: "Romania", triedIt:true, date: new Date('2020-10-11'), text: "descriptionPizza", likes: 2} :
+        (id === 3) ? { id: 3, name: "Icecream", origin: "Romania", triedIt:true, date: new Date('2020-10-11'), text: "descriptionIcecrea", likes: 2} : 
+        { id: 4, name: "Chocolate", origin: "Romania", triedIt:true, date: new Date('2020-10-11'), text: "descriptionChocolate", likes: 20};
 }
 const logger = getLogger("editRecipe");
 
 const EditRecipe: React.FC<RecipePropsRoute> = ({history, match}) =>  {
 logger("orice");
-    const currentRecipe = recipeProvider(+match.params.id);
+    const currentRecipe = { id: 4, name: "Chocolate", text: "descriptionChocolate", likes: 20};//recipeProvider(+match.params.id);
     const { text, name, likes } = currentRecipe;
     return (
         <IonPage>

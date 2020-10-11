@@ -1,6 +1,6 @@
 #recipeList{
     display: inline-block;
-    width: 40%;
+    width: 80%;
     height: auto;
 }
 #editRecipe{
@@ -11,3 +11,7 @@
 #recipeList:hover{
     cursor: pointer;
 }
+.likeButton{
+    display: flex;
+    justify-content: center;
+} 
