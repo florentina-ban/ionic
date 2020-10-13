@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IonCard, IonCardContent, IonCardTitle, IonContent, IonHeader, IonInput, IonItem, IonItemDivider, IonLabel, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import './recipeList.css';
 import RecipePropsRoute from '../interfaces/RecipePropsRoute';
@@ -14,7 +14,8 @@ const logger = getLogger("editRecipe");
 
 const EditRecipe: React.FC<RecipePropsRoute> = ({history, match}) =>  {
 logger("orice");
-    const currentRecipe = { id: 4, name: "Chocolate", text: "descriptionChocolate", likes: 20};//recipeProvider(+match.params.id);
+    const currentRecipe = recipeProvider(+match.params.id);
+    const [state, setState] = useState(currentRecipe);
     const { text, name, likes } = currentRecipe;
     return (
         <IonPage>

@@ -1,17 +1,36 @@
 #recipeList{
-    display: inline-block;
-    width: 80%;
-    height: auto;
+    display: block;
+    width: 70%;
+    margin: auto;
+    margin-top: 5%;
 }
 #editRecipe{
     display: inline-block;
     width: 40%;
     height: auto;
 }
-#recipeList:hover{
-    cursor: pointer;
-}
-.likeButton{
+.flexInlineContainer{
+    display: block;
     display: flex;
     justify-content: center;
 } 
+.smallLabel{
+    max-width: 5% !important;
+}
+.normalLabel{
+  max-width: 15% !important;
+}
+.largeLabel{
+    max-width: 25% !important;
+}
+ion-fab-button{
+    margin-right: 4%;
+}
+#addButton{
+    display: inline;
+    float: right;
+    margin-top: 4%;
+}
+.cardTitle{
+    margin: 4%;
+}

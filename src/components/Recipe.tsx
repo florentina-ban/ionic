@@ -1,5 +1,5 @@
-import { IonButton, IonCheckbox, IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
-import { alertCircleOutline, buildOutline, checkboxOutline, checkmark, checkmarkCircleOutline, checkmarkCircleSharp, closeCircleOutline, closeCircleSharp, square, squareOutline, thumbsUp, thumbsUpOutline, thumbsUpSharp, trashBinOutline } from 'ionicons/icons';
+import {IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
+import {  buildOutline, checkboxOutline,  squareOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
 import React, { useState } from 'react';
 import RecipePropsExt from '../interfaces/RecipePropsExt';
 import './recipeList.css';
@@ -19,34 +19,37 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
         const { editRecipe } = state;
         editRecipe(id);
     }
+    const onDelete = () =>  {
+      const {removeRecipe} = state;
+      removeRecipe(id);
+
+    }
 
   return (    
         <IonItem>
-          <IonLabel>{name}</IonLabel>
+          <IonLabel class="normalLabel">{name}</IonLabel>
           <IonNote>Origin</IonNote>
-          <IonLabel>{origin}</IonLabel>
+          <IonLabel class="normalLabel">{origin}</IonLabel>
           <IonNote>Tried it</IonNote>
-          { triedIt && <IonFabButton size="small"><IonIcon  icon={checkboxOutline}/></IonFabButton>}
-          { !triedIt && <IonFabButton size="small"><IonIcon icon={squareOutline}/></IonFabButton> } 
+          { triedIt && <IonFabButton color="light" size="small"><IonIcon  icon={checkboxOutline}/></IonFabButton>}
+          { !triedIt && <IonFabButton color="light" size="small"><IonIcon icon={squareOutline}/></IonFabButton> } 
 
           <IonNote>Description</IonNote>
-          <IonLabel>{text}</IonLabel>
+          <IonLabel class="largeLabel">{text}</IonLabel>
           <IonNote>Likes</IonNote>
-          <IonLabel class="label">{likes}</IonLabel>
+          <IonLabel class="smallLabel">{likes}</IonLabel>
           <div className="flexInlineContainer">
-          <IonFabButton size="small" onClick={addLike}>
+          <IonFabButton size="small" color="tertiary" onClick={addLike}>
             <IonIcon icon={thumbsUp} />
           </IonFabButton>
-          </div>
-          <IonNote>Date</IonNote>
-          <IonLabel>{date.toDateString()}</IonLabel>
+          </div>    
           <div className="flexInlineContainer">
-          <IonFabButton size="small" >
-            <IonIcon icon={buildOutline} />
+          <IonFabButton size="small" color="tertiary">
+            <IonIcon icon={buildOutline}  onClick={onEditRecipe}/>
           </IonFabButton>
           </div>
           <div className="flexInlineContainer">
-          <IonFabButton size="small">
+          <IonFabButton size="small" color="tertiary" onClick={onDelete}>
             <IonIcon icon={trashBinOutline} />
           </IonFabButton>
           </div>
