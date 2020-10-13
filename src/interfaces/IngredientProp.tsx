@@ -1,5 +1,5 @@
 interface IngredientProps {
-    id: string;
+    id: number;
     name: string;
 }
 

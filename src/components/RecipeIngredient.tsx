@@ -1,15 +1,24 @@
-import React from "react";
-import IngredientProp from "../interfaces/IngredientProp"
+import { IonItem, IonLabel, IonNote } from "@ionic/react";
+import React, { useState } from "react";
+import IngredientProps from "../interfaces/IngredientProp";
 
 interface RecipeIngredientProps {
-    recipeIngredient: IngredientProp 
+    ingredient: IngredientProps
     id: number
     quantity: number
 }
 
-const RecipeIngredient: React.FC<RecipeIngredientProps> = ({ id, recipeIngredient, quantity }) => {
+const RecipeIngredient: React.FC<RecipeIngredientProps> = (props) => {
+  const [state, setState] = useState(props);
+  const { ingredient, id, quantity} = state;
+
   return (
-    <div>ingredient</div>
+    <IonItem>
+      <IonNote>Ingredient</IonNote>
+      <IonLabel>{ingredient.name}</IonLabel>
+      <IonNote>Quantity</IonNote>
+      <IonLabel>{quantity}</IonLabel>
+    </IonItem>
   );
 };
 

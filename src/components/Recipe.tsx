@@ -1,4 +1,4 @@
-import {IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
+import {IonButton, IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
 import {  buildOutline, checkboxOutline,  squareOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
 import React, { useState } from 'react';
 import RecipePropsExt from '../interfaces/RecipePropsExt';
@@ -13,7 +13,7 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
         const likeNo = likes + 1;
         setState({...state, likes: likeNo});
     }
-    const {id, name, text, likes, date, triedIt, origin} = state;
+    const {id, name, text, likes, ingredients, date, triedIt, origin} = state;
 
     const onEditRecipe = () => {
         const { editRecipe } = state;
@@ -24,18 +24,24 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
       removeRecipe(id);
 
     }
+    const showIngredients = () => {
+      console.log(ingredients);
+    }
 
+    console.log("recipe");
   return (    
         <IonItem>
           <IonLabel class="normalLabel">{name}</IonLabel>
           <IonNote>Origin</IonNote>
           <IonLabel class="normalLabel">{origin}</IonLabel>
+          <IonNote>Description</IonNote>
+          <IonLabel class="largeLabel">{text}</IonLabel>
+          <IonNote>Ingredients </IonNote>
+          <IonLabel class="smallLabel"><IonFabButton size="small" color="tertiary" onClick={showIngredients}>{ingredients?.length}</IonFabButton></IonLabel>
           <IonNote>Tried it</IonNote>
           { triedIt && <IonFabButton color="light" size="small"><IonIcon  icon={checkboxOutline}/></IonFabButton>}
           { !triedIt && <IonFabButton color="light" size="small"><IonIcon icon={squareOutline}/></IonFabButton> } 
-
-          <IonNote>Description</IonNote>
-          <IonLabel class="largeLabel">{text}</IonLabel>
+          
           <IonNote>Likes</IonNote>
           <IonLabel class="smallLabel">{likes}</IonLabel>
           <div className="flexInlineContainer">

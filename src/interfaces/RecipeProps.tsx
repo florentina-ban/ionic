@@ -1,4 +1,4 @@
-import React from 'react';
+import RecipeIngredientProps from './RecipeIngredientProps';
 
 interface RecipeProps {
     id: number;
@@ -8,7 +8,7 @@ interface RecipeProps {
     text: string;
     triedIt: boolean;
     likes: number;
-    
+    ingredients?: RecipeIngredientProps[];
 }
 
 export default RecipeProps;
