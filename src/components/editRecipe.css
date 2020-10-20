@@ -1,0 +1,32 @@
+
+#cardContent{
+    position: relative;
+}
+.comboItem{
+   display: inline-block;
+   width: 50%;
+ }
+ion-select {
+  width: 80%;
+}
+ion-input {
+  margin-left: 15%;
+}
+ion-datetime{
+  margin-left: 70%;
+}
+ion-checkbox{
+ margin-left: 88%;
+}
+.cardTitle{
+  margin: 4%;
+}
+#editRecipe{
+  display: block;
+  width: 40%;
+  margin: auto;
+  margin-top: 1%;
+}
+#addIngredientButton{
+  float: right;
+}

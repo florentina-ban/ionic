@@ -1,4 +1,4 @@
-import {IonButton, IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
+import { IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
 import {  buildOutline, checkboxOutline,  squareOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
 import React, { useState } from 'react';
 import RecipePropsExt from '../interfaces/RecipePropsExt';
@@ -28,7 +28,6 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
       console.log(ingredients);
     }
 
-    console.log("recipe");
   return (    
         <IonItem>
           <IonLabel class="normalLabel">{name}</IonLabel>

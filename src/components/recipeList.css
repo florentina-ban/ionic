@@ -4,16 +4,7 @@
     margin: auto;
     margin-top: 5%;
 }
-#editRecipe{
-    display: inline-block;
-    width: 40%;
-    height: auto;
-}
-.flexInlineContainer{
-    display: block;
-    display: flex;
-    justify-content: center;
-} 
+
 .smallLabel{
     max-width: 5% !important;
 }

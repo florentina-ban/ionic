@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { IonCard, IonCardContent, IonCardTitle, IonContent, IonFabButton, IonHeader, IonIcon, IonItemDivider, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonContent, IonFabButton, IonHeader, IonIcon, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import Recipe from './Recipe';
 import './recipeList.css';
 import { RouteComponentProps } from 'react-router';
 import RecipeProps from '../interfaces/RecipeProps';
 import { getLogger } from '../core';
-import { add, addCircleOutline } from 'ionicons/icons';
+import { add } from 'ionicons/icons';
 import IngredientProps from '../interfaces/IngredientProp';
 import RecipeIngredientProps from '../interfaces/RecipeIngredientProps';
-import RecipeIngredient from './RecipeIngredient';
 
 const recipesProvider = () => {
     var recipeList: RecipeProps[]   
@@ -38,7 +37,6 @@ const ingredientProvider = () =>{
     ingredients.push(ingredient2);
     ingredients.push(ingredient3);
     ingredients.push(ingredient4);
-
     return ingredients;
 }
 
@@ -76,7 +74,7 @@ const RecipeList: React.FC<RouteComponentProps> = ({history}) =>  {
             </IonHeader>
             <IonContent color="light">  
                 <IonCard id="recipeList">
-                    <IonCardTitle class="cardTitle">My recipes  :)</IonCardTitle>
+                    <IonCardTitle class="cardTitle">My recipes</IonCardTitle>
                     <IonCardContent >
                         <IonList >
                         {recipes.map(({id, text, name, likes, ingredients, origin, date, triedIt}) => 
