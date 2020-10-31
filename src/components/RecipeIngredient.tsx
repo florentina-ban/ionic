@@ -1,15 +1,10 @@
-import { IonFabButton, IonIcon, IonInput, IonItem, IonLabel, IonNote, IonSelect, IonSelectOption } from "@ionic/react";
+import { IonFabButton, IonIcon, IonInput, IonItem, IonNote, IonSelect, IonSelectOption } from "@ionic/react";
 import { trashBinOutline } from "ionicons/icons";
 import React, { useState } from "react";
 import { getLogger } from "../core";
 import IngredientProps from "../interfaces/IngredientProp";
 import './editRecipe.css';
 
-interface RecipeIngredientProps {
-    ingredient: IngredientProps
-    id: number
-    quantity: number
-}
 interface RecipeIngredientPropsExt {
     ingredient: IngredientProps
     id: number

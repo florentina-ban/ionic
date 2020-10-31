@@ -9,17 +9,15 @@
 ion-select {
   width: 80%;
 }
-ion-input {
-  margin-left: 15%;
-}
-ion-datetime{
-  margin-left: 70%;
-}
-ion-checkbox{
- margin-left: 88%;
+ion-input.textRight{
+  text-align: right !important;
 }
 .cardTitle{
   margin: 4%;
+}
+#buttonItem{
+  display: flex;
+  justify-content: space-around;
 }
 #editRecipe{
   display: block;
@@ -29,4 +27,5 @@ ion-checkbox{
 }
 #addIngredientButton{
   float: right;
+  margin-right: 6%;
 }

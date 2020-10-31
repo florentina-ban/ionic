@@ -1,11 +1,7 @@
-import { IonCard, IonFabButton, IonIcon, IonItemDivider, IonList, IonNote, IonSelect } from "@ionic/react";
-import { stat } from "fs";
+import { IonFabButton, IonIcon, IonList, IonNote} from "@ionic/react";
 import { add } from "ionicons/icons";
-import React, { ComponentProps, useState } from "react";
-import { RouteComponentProps } from "react-router";
+import React, { useState } from "react";
 import { getLogger } from "../core";
-import IngredientProps from "../interfaces/IngredientProp";
-import RecipeIngredientProps from "../interfaces/RecipeIngredientProps";
 import RecipeIngredientsListProps from "../interfaces/RecipeIngredientsListProps";
 import RecipeIngredient from "./RecipeIngredient";
 
@@ -24,24 +20,22 @@ const RecipeIngredients: React.FC<RecipeIngredientsListProps> = (props) => {
     }
 
     const removeIngredient = (id: Number) => {
-      var ingredients2: RecipeIngredientProps[] = [];
-      ingredients.forEach(element => {
-        if (element.id!=id){
-          ingredients2.push(element);
-          logger(element);
-        }
-      });
-      setState( {ingredients: ingredients2} );
+      const ingredients2 = ingredients.filter(ingr => { return ingr.id !== id});
+      logger(ingredients2);
+      setState( {...state, ingredients: ingredients2} );
     }
  
   return (  
-        <IonList>
-            <IonNote>Ingredients: </IonNote>              
+   <div>
+      <IonNote>Ingredients:</IonNote>
+        
+          <IonList id="ingredientsList">
                 { ingredients.map(({ingredient, id, quantity}) =>                
                  <RecipeIngredient ingredient={ingredient} quantity={quantity} id={id} removeIngredientFunction={removeIngredient}/>
                 )}             
-                <IonFabButton size="small" id="addIngredientButton" onClick={addIngredient}> <IonIcon  icon={add}></IonIcon></IonFabButton>
-        </IonList>     
+                <IonFabButton size="small" slot="end" color="tertiary" id="addIngredientButton" onClick={addIngredient}> <IonIcon  icon={add}></IonIcon></IonFabButton>
+          </IonList> 
+    </div>  
   );
 };
 

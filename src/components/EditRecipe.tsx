@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonHeader, IonInput, IonItem, IonItemDivider, IonLabel, IonNote, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonNote, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import './editRecipe.css';
 import RecipePropsRoute from '../interfaces/RecipePropsRoute';
 import { getLogger } from '../core';
@@ -7,6 +7,7 @@ import RecipeIngredients from './RecipeIngredients';
 import IngredientProps from '../interfaces/IngredientProp';
 import RecipeProps from '../interfaces/RecipeProps';
 import RecipeIngredientProps from '../interfaces/RecipeIngredientProps';
+import { checkmarkDone, closeCircleOutline } from 'ionicons/icons';
 
 const recipeProvider = (id: number) => {
     var recipeList: RecipeProps[]   
@@ -57,21 +58,27 @@ logger("orice");
                     <IonCardContent id="cardContent">                        
                         <IonItem key={text}>
                             <IonNote>Description: </IonNote>
-                            <IonInput value={text} />
+                            <IonInput class="textRight" slot="end" value={text} />
                         </IonItem>                      
                         <IonItem key={likes}>
                             <IonNote>Likes: </IonNote>
-                            <IonInput value={likes} />
+                            <IonInput class="textRight" slot="end" value={likes} />
                         </IonItem>
                         <IonItem key="triedIt">
                             <IonNote>Tried it: </IonNote>
-                            <IonCheckbox checked={triedIt}/>
+                            <IonCheckbox color="tertiary" slot="end" checked={triedIt}/>
                         </IonItem>
                         <IonItem key={date.toDateString()}>
                             <IonNote>Date: </IonNote>
-                            <IonDatetime value={date.toDateString()}></IonDatetime>
-                        </IonItem>                       
-                        <RecipeIngredients ingredients={ingredients}></RecipeIngredients>                
+                            <IonDatetime slot="end" value={date.toDateString()}></IonDatetime>
+                        </IonItem> 
+                         <IonItem>                    
+                            <RecipeIngredients ingredients={ingredients}></RecipeIngredients>  
+                        </IonItem>
+                        <div id="buttonItem">
+                            <IonFabButton size="small" color="tertiary"><IonIcon icon={closeCircleOutline}></IonIcon></IonFabButton>
+                            <IonFabButton size="small" color="tertiary"><IonIcon icon={checkmarkDone}></IonIcon></IonFabButton>
+                        </div>              
                     </IonCardContent>
                 </IonCard>
             </IonContent>

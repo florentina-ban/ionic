@@ -1,6 +1,6 @@
 #recipeList{
     display: block;
-    width: 80%;
+    width: 40%;
     margin: auto;
     margin-top: 5%;
 }
@@ -12,16 +12,23 @@
   max-width: 15% !important;
 }
 .largeLabel{
-    max-width: 25% !important;
+    max-width: 30% !important;
 }
 ion-fab-button{
-    margin-right: 4%;
+    display: inline-block;
 }
 #addButton{
     display: inline;
     float: right;
     margin-top: 4%;
 }
+#ingredientsList{
+ 
+}
 .cardTitle{
     margin: 4%;
+}
+.buttonsContainer{
+    margin-left: 5%;
+    max-width: 40% !important;    
 }

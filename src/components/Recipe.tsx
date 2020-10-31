@@ -1,10 +1,14 @@
-import { IonFabButton, IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
-import {  buildOutline, checkboxOutline,  squareOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
+import { IonFabButton, IonIcon, IonItem, IonLabel, IonNote} from '@ionic/react';
+import {  buildOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
 import React, { useState } from 'react';
+import { getLogger } from '../core';
 import RecipePropsExt from '../interfaces/RecipePropsExt';
 import './recipeList.css';
 
 const Recipe: React.FC<RecipePropsExt> = (props) => {
+
+    const logger = getLogger("recipe");
+    logger("recipe");
 
     const [state, setState] = useState<RecipePropsExt>(props);
 
@@ -13,7 +17,7 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
         const likeNo = likes + 1;
         setState({...state, likes: likeNo});
     }
-    const {id, name, text, likes, ingredients, date, triedIt, origin} = state;
+    const {id, name, text, likes, ingredients, date, triedIt, origin, menuOpened} = state;
 
     const onEditRecipe = () => {
         const { editRecipe } = state;
@@ -24,40 +28,43 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
       removeRecipe(id);
 
     }
-    const showIngredients = () => {
-      console.log(ingredients);
+    const openMenu = () => {
+     const { menuOpened } = state;
+     const newValue = !menuOpened ;
+     setState({...state, menuOpened: newValue});
+
     }
 
   return (    
         <IonItem>
-          <IonLabel class="normalLabel">{name}</IonLabel>
+          <IonLabel class="largeLabel">{name}</IonLabel>
+          <IonNote>{id}</IonNote>
           <IonNote>Origin</IonNote>
           <IonLabel class="normalLabel">{origin}</IonLabel>
-          <IonNote>Description</IonNote>
-          <IonLabel class="largeLabel">{text}</IonLabel>
-          <IonNote>Ingredients </IonNote>
-          <IonLabel class="smallLabel"><IonFabButton size="small" color="tertiary" onClick={showIngredients}>{ingredients?.length}</IonFabButton></IonLabel>
-          <IonNote>Tried it</IonNote>
-          { triedIt && <IonFabButton color="light" size="small"><IonIcon  icon={checkboxOutline}/></IonFabButton>}
-          { !triedIt && <IonFabButton color="light" size="small"><IonIcon icon={squareOutline}/></IonFabButton> } 
-          
           <IonNote>Likes</IonNote>
           <IonLabel class="smallLabel">{likes}</IonLabel>
-          <div className="flexInlineContainer">
+
+          {/* <IonFabButton size="small" color="tertiary"><IonIcon icon={listOutline}  onClick={openMenu}/> </IonFabButton>
+            
+          <IonSelect >            
+            <IonSelectOption>Like</IonSelectOption>
+            <IonSelectOption onSelect={onEditRecipe}>Edit </IonSelectOption>
+            <IonSelectOption onSelect={onDelete}>Delete</IonSelectOption>
+          </IonSelect>
+         */}
+         
+          <div className="buttonsContainer">
           <IonFabButton size="small" color="tertiary" onClick={addLike}>
             <IonIcon icon={thumbsUp} />
           </IonFabButton>
-          </div>    
-          <div className="flexInlineContainer">
           <IonFabButton size="small" color="tertiary">
             <IonIcon icon={buildOutline}  onClick={onEditRecipe}/>
           </IonFabButton>
-          </div>
-          <div className="flexInlineContainer">
           <IonFabButton size="small" color="tertiary" onClick={onDelete}>
             <IonIcon icon={trashBinOutline} />
           </IonFabButton>
-          </div>
+          
+          </div>    
         </IonItem>
 
   );
