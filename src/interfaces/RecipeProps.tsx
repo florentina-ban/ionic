@@ -8,7 +8,7 @@ interface RecipeProps {
     text: string;
     triedIt: boolean;
     likes: number;
-    ingredients?: RecipeIngredientProps[];
+    recipeIngredients: RecipeIngredientProps[];
 }
 
 export default RecipeProps;

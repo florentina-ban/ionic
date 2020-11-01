@@ -1,7 +1,7 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { getLogger } from '../core';
-import { getRecipes, newWebSocket, newWebSocketR } from './ingredientsApi';
+import { createRecipe, getRecipes, newWebSocket, newWebSocketR, removeRecipe, updateRecipe } from './ingredientsApi';
 import RecipeProps from '../interfaces/RecipeProps';
 
 const log = getLogger('RecipesProvider');
@@ -10,7 +10,8 @@ const initialState: RecipesState = {
   savingR: false,
 };
 
-//type SaveItemFn = (item: ItemProps) => Promise<any>;
+type SaveItemFn = (item: RecipeProps) => Promise<any>;
+type DeleteItemFn = (id: number) => Promise<any>;
 
 export interface RecipesState {
   recipes?: RecipeProps[],
@@ -18,7 +19,8 @@ export interface RecipesState {
   fetchingErrorR?: Error | null,
   savingR: boolean,
   savingErrorR?: Error | null,
-  //saveItem?: SaveItemFn,
+  saveRecipe?: SaveItemFn,
+  deleteRecipe?: DeleteItemFn
 }
 
 interface ActionProps {
@@ -32,6 +34,9 @@ const FETCH_ITEMS_FAILED = 'FETCH_ITEMS_FAILED';
 const SAVE_ITEM_STARTED = 'SAVE_ITEM_STARTED';
 const SAVE_ITEM_SUCCEEDED = 'SAVE_ITEM_SUCCEEDED';
 const SAVE_ITEM_FAILED = 'SAVE_ITEM_FAILED';
+const DELETE_ITEM_STARTED = 'DELETE_ITEM_STARTED';
+const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
+const DELETE_ITEM_FAILED = 'DELETE_ITEM_FAILED';
 
 
 const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
@@ -49,7 +54,9 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         return { ...state, savingErrorR: null, savingR: true };
       case SAVE_ITEM_SUCCEEDED:
         const recipes = [...(state.recipes || [])];
+        log(recipes);
         const item = payload.recipe;
+        log(item);
         const index = recipes.findIndex(it => it.id === item.id);
         if (index === -1) {
           recipes.splice(0, 0, item);
@@ -58,6 +65,14 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         }
         return { ...state, recipes, savingR: false };
       case SAVE_ITEM_FAILED:
+        return { ...state, savingErrorR: payload.error, savingR: false };
+        case DELETE_ITEM_STARTED:
+        return { ...state, savingErrorR: null, savingR: true };
+      case DELETE_ITEM_SUCCEEDED:
+        const recipes2 = payload.recipes;
+        log(recipes2);
+        return { ...state, recipes:recipes2, savingR: false };
+      case DELETE_ITEM_FAILED:
         return { ...state, savingErrorR: payload.error, savingR: false };
       default:
         return state;
@@ -76,7 +91,10 @@ export const RecipesProvider: React.FC<RecipeProviderProps> = ({ children }) => 
   const { recipes, fetchingR, fetchingErrorR, savingR, savingErrorR } = state;
   useEffect(getItemsEffect, []);
   useEffect(wsEffectR, []);
-  const value = { recipes, fetchingR, fetchingErrorR, savingR, savingErrorR };
+  const saveRecipe = useCallback<SaveItemFn>(saveItemCallback, []);
+  const deleteRecipe = useCallback<DeleteItemFn>(deleteItemCallback, []);
+ 
+  const value = { recipes, fetchingR, fetchingErrorR, savingR, savingErrorR, saveRecipe, deleteRecipe };
  
   log('returns');
   return (
@@ -109,37 +127,31 @@ export const RecipesProvider: React.FC<RecipeProviderProps> = ({ children }) => 
   }
   
   
-/*
-  async function saveItemCallback(item: ItemProps) {
+  async function saveItemCallback(item: RecipeProps) {
     try {
-      log('saveItem started');
+      log('saveRecipe started');
       dispatch({ type: SAVE_ITEM_STARTED });
-      const savedItem = await (item.id ? updateItem(item) : createItem(item));
-      log('saveItem succeeded');
-      dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: savedItem } });
+      log("myLog!");
+      log(item);
+      const recipe = await (item.id!==0 ? updateRecipe(item) : createRecipe(item));
+      log('saveRecipe succeeded');
+      dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { recipe } });
     } catch (error) {
-      log('saveItem failed');
+      log('saveRecipe failed');
       dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
     }
   }
-*/
-  function wsEffect() {
-    let canceled = false;
-    log('wsEffect - connecting');
-    const closeWebSocket = newWebSocket(message => {
-      if (canceled) {
-        return;
-      }
-      const { event, payload: { ingredient }} = message;
-      log(`ws message, item ${event}`);
-      if (event === 'created' || event === 'updated') {
-        dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { ingredient } });
-      }
-    });
-    return () => {
-      log('wsEffect - disconnecting');
-      canceled = true;
-      closeWebSocket();
+
+  async function deleteItemCallback(id: number) {
+    try {
+      log('deleteRecipe started');
+      dispatch({ type: DELETE_ITEM_STARTED });
+      const recipes = await (removeRecipe(id));
+      log('deleteRecipe succeeded');
+      dispatch({ type: DELETE_ITEM_SUCCEEDED, payload: { recipes } });
+    } catch (error) {
+      log('deleteRecipe failed');
+      dispatch({ type: DELETE_ITEM_FAILED, payload: { error } });
     }
   }
 

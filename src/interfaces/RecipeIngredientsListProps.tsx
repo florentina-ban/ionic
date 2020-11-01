@@ -4,7 +4,7 @@ import IngredientProps from './IngredientProp';
 import RecipeIngredientProps from './RecipeIngredientProps';
 
 interface RecipeIngredientsListProps {
-    ingredients: RecipeIngredientProps[];
+    recipeIngredients: RecipeIngredientProps[];
 }
 
 export default RecipeIngredientsListProps;

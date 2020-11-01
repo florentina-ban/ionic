@@ -17,7 +17,7 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
         const likeNo = likes + 1;
         setState({...state, likes: likeNo});
     }
-    const {id, name, text, likes, ingredients, date, triedIt, origin, menuOpened} = state;
+    const {id, name, text, likes, recipeIngredients: ingredients, date, triedIt, origin, menuOpened} = state;
 
     const onEditRecipe = () => {
         const { editRecipe } = state;
@@ -25,7 +25,10 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
     }
     const onDelete = () =>  {
       const {removeRecipe} = state;
-      removeRecipe(id);
+      if (id){
+        removeRecipe(id);
+       
+      }
 
     }
     const openMenu = () => {
@@ -36,23 +39,13 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
     }
 
   return (    
-        <IonItem>
+        <IonItem key={"id"+id?.toFixed()}>
           <IonLabel class="largeLabel">{name}</IonLabel>
-          <IonNote>{id}</IonNote>
           <IonNote>Origin</IonNote>
           <IonLabel class="normalLabel">{origin}</IonLabel>
           <IonNote>Likes</IonNote>
           <IonLabel class="smallLabel">{likes}</IonLabel>
 
-          {/* <IonFabButton size="small" color="tertiary"><IonIcon icon={listOutline}  onClick={openMenu}/> </IonFabButton>
-            
-          <IonSelect >            
-            <IonSelectOption>Like</IonSelectOption>
-            <IonSelectOption onSelect={onEditRecipe}>Edit </IonSelectOption>
-            <IonSelectOption onSelect={onDelete}>Delete</IonSelectOption>
-          </IonSelect>
-         */}
-         
           <div className="buttonsContainer">
           <IonFabButton size="small" color="tertiary" onClick={addLike}>
             <IonIcon icon={thumbsUp} />

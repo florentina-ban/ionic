@@ -1,50 +1,54 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonNote, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import './editRecipe.css';
-import RecipePropsRoute from '../interfaces/RecipePropsRoute';
 import { getLogger } from '../core';
 import RecipeIngredients from './RecipeIngredients';
-import IngredientProps from '../interfaces/IngredientProp';
 import RecipeProps from '../interfaces/RecipeProps';
 import RecipeIngredientProps from '../interfaces/RecipeIngredientProps';
 import { checkmarkDone, closeCircleOutline } from 'ionicons/icons';
+import { IngredientsContext } from './ItemProvider';
+import { RecipesContext } from './RecipesProvider';
+import { RouteComponentProps } from 'react-router';
 
-const recipeProvider = (id: number) => {
-    var recipeList: RecipeProps[]   
-    const ingredients = ingredientProvider();
-    var recipeIngredients1, recipeIngredients2, recipeIngredients3, recipeIngredients4: RecipeIngredientProps[]
-    recipeIngredients1 = [{id: 1, ingredient: ingredients[0], quantity: 2},{id: 2, ingredient: ingredients[1], quantity: 3}]
-    recipeIngredients2 = [{id: 1, ingredient: ingredients[2], quantity: 1},{id: 2, ingredient: ingredients[3], quantity: 1.5}]
-    recipeIngredients3 = [{id: 1, ingredient: ingredients[0], quantity: 1}]
-    recipeIngredients4 = [{id: 1, ingredient: ingredients[3], quantity: 1},{id: 2, ingredient: ingredients[1], quantity: 2.2}, {id: 2, ingredient: ingredients[0], quantity: 2.2}]
+interface RecipeEditProps extends RouteComponentProps<{
+    id?: string;
+  }> {}
 
-    return (id === 1) ? { id: 1, name: "Banana bread", ingredients:recipeIngredients1, origin: "Romania", triedIt:true, date: new Date('2020-10-11'),  text: "descriptionBanana", likes: 2} :
-        (id === 2) ? { id: 2, name: "Pizza", ingredients: recipeIngredients2, origin: "Romania", triedIt:true, date: new Date('2020-10-11'), text: "descriptionPizza", likes: 2} :
-        (id === 3) ? { id: 3, name: "Icecream", ingredients: recipeIngredients3, origin: "Romania", triedIt:true, date: new Date('2020-10-11'), text: "descriptionIcecrea", likes: 2} : 
-        { id: 4, name: "Chocolate", origin: "Romania", ingredients: recipeIngredients4, triedIt:true, date: new Date('2020-10-11'), text: "descriptionChocolate", likes: 20};
-}
+const EditRecipe: React.FC<RecipeEditProps> = ({history, match}) =>  {
+
 const logger = getLogger("editRecipe");
+const { items, fetching, fetchingError } = useContext(IngredientsContext);
+const { recipes, fetchingR, fetchingErrorR, savingR, savingErrorR, saveRecipe } = useContext(RecipesContext);
+const routeId = match.params;
+const [currentRecipe, setRecipe] = useState<RecipeProps>();
+// const [id, setId ] =useState(0);
+// const [text, setText ] =useState("");
+// const [origin, setOrigin ] =useState("");
+// const [triedIt, setTriedIt ] =useState(false);
+// const [recipeIngredients, setIngredients ] = useState<RecipeIngredientProps[]>();
+// const [date, setDate ] =useState(new Date());
+// const [name, setName ] =useState("");
+// const [likes, setLikes ] = useState(0);
 
-const ingredientProvider = () =>{
-    var ingredients: IngredientProps[] = [];
-    const ingredient1 = {id: 1, name:"flour"};
-    const ingredient2 = {id: 2, name:"onion"};
-    const ingredient3 = {id: 3, name:"potatoes"};
-    const ingredient4 = {id: 4, name:"milk"};
-    ingredients.push(ingredient1);
-    ingredients.push(ingredient2);
-    ingredients.push(ingredient3);
-    ingredients.push(ingredient4);
-
-    return ingredients;
+ useEffect(() => {
+    logger('useEffect');
+    const routeId = match.params.id || '';
+    var currentRecipe = recipes?.find(it => it.id === +routeId); 
+    if (!currentRecipe)
+        currentRecipe = {id: 0, name: '',origin: '', text: '',date: new Date('01-01.2020'), likes: 0, triedIt: false, recipeIngredients: []};
+    setRecipe(currentRecipe);
+  }, [match.params.id, recipes]);
+  const emptyingrList: RecipeIngredientProps[] = [];
+    
+const cancelEdit = () =>{
+    history.push('/home');    
 }
-
-
-const EditRecipe: React.FC<RecipePropsRoute> = ({history, match}) =>  {
-logger("orice");
-    const currentRecipe = recipeProvider(+match.params.id);
-    const [state, setState] = useState(currentRecipe);
-    const { text, date, triedIt, ingredients, name, likes } = currentRecipe;
+const onSaveRecipe = () => {
+    const editedRecipe = currentRecipe;
+    logger(editedRecipe);
+    if (editedRecipe)
+        saveRecipe && saveRecipe(editedRecipe).then(() => history.goBack());
+}
     return (
         <IonPage>
             <IonHeader>
@@ -54,30 +58,69 @@ logger("orice");
             </IonHeader>
             <IonContent>     
                 <IonCard id="editRecipe">
-                    <IonCardTitle class="cardTitle">{name}</IonCardTitle>
-                    <IonCardContent id="cardContent">                        
-                        <IonItem key={text}>
+                    <IonCardTitle class="cardTitle">Recipe</IonCardTitle>
+                    <IonCardContent id="cardContent">   
+                         <IonItem key="name">
+                            <IonNote>Name: </IonNote>
+                            <IonInput class="textRight" slot="end" value={currentRecipe?.name} onIonChange={e => {
+                                if (currentRecipe)  
+                                    currentRecipe.name = e.detail.value?.toString() || "";
+                                setRecipe(currentRecipe);
+                               
+                                } }/>
+                        </IonItem>      
+                        <IonItem key="origin">
+                            <IonNote>Origin: </IonNote>
+                            <IonInput class="textRight" slot="end" value={currentRecipe?.origin} onIonChange={e => {
+                                if (currentRecipe)  
+                                    currentRecipe.origin = e.detail.value?.toString() || "";
+                                setRecipe(currentRecipe);
+                                
+                                } }/>
+                        </IonItem>     
+                        <IonItem key="text">
                             <IonNote>Description: </IonNote>
-                            <IonInput class="textRight" slot="end" value={text} />
+                            <IonInput class="textRight" slot="end" value={currentRecipe?.text} onIonChange={e => {
+                                if (currentRecipe)  
+                                    currentRecipe.text = e.detail.value?.toString() || "";
+                                setRecipe(currentRecipe);
+                               
+                                } }/>
                         </IonItem>                      
-                        <IonItem key={likes}>
+                        <IonItem key="likes">
                             <IonNote>Likes: </IonNote>
-                            <IonInput class="textRight" slot="end" value={likes} />
+                            <IonInput class="textRight" slot="end" value={currentRecipe?.likes} onIonChange={e => {
+                                if (currentRecipe && e.detail.value)
+                                    currentRecipe.likes = Number(e.detail.value);
+                                setRecipe(currentRecipe);
+                                
+                                } }/>
                         </IonItem>
                         <IonItem key="triedIt">
                             <IonNote>Tried it: </IonNote>
-                            <IonCheckbox color="tertiary" slot="end" checked={triedIt}/>
+                            <IonCheckbox color="tertiary" slot="end" checked={currentRecipe?.triedIt} onIonChange={e => {
+                                if (currentRecipe) 
+                                    currentRecipe.triedIt = e.detail.value.checked;
+                                setRecipe(currentRecipe);
+                             
+                                } }/>
                         </IonItem>
-                        <IonItem key={date.toDateString()}>
+                        <IonItem key="date">
                             <IonNote>Date: </IonNote>
-                            <IonDatetime slot="end" value={date.toDateString()}></IonDatetime>
+                            <IonDatetime slot="end" displayFormat="DD MM YYYY" placeholder="Select Date" value={currentRecipe?.date.toDateString()}
+                            onIonChange={e => {
+                                if (currentRecipe && e.detail.value)
+                                    currentRecipe.date = new Date(e.detail.value.toString());
+                                setRecipe(currentRecipe);
+                                
+                            }}> </IonDatetime>
                         </IonItem> 
                          <IonItem>                    
-                            <RecipeIngredients ingredients={ingredients}></RecipeIngredients>  
+                            <RecipeIngredients recipeIngredients={currentRecipe?.recipeIngredients? currentRecipe?.recipeIngredients : emptyingrList}></RecipeIngredients>  
                         </IonItem>
-                        <div id="buttonItem">
-                            <IonFabButton size="small" color="tertiary"><IonIcon icon={closeCircleOutline}></IonIcon></IonFabButton>
-                            <IonFabButton size="small" color="tertiary"><IonIcon icon={checkmarkDone}></IonIcon></IonFabButton>
+                        <div key="ButtonItem" id="buttonItem">
+                            <IonFabButton size="small" color="tertiary" onClick={cancelEdit}><IonIcon icon={closeCircleOutline}></IonIcon></IonFabButton>
+                            <IonFabButton size="small" color="tertiary"><IonIcon icon={checkmarkDone} onClick={onSaveRecipe}></IonIcon></IonFabButton>
                         </div>              
                     </IonCardContent>
                 </IonCard>

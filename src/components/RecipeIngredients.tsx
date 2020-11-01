@@ -5,24 +5,22 @@ import { getLogger } from "../core";
 import RecipeIngredientsListProps from "../interfaces/RecipeIngredientsListProps";
 import RecipeIngredient from "./RecipeIngredient";
 
-
-
 const RecipeIngredients: React.FC<RecipeIngredientsListProps> = (props) => {
     
     const [state, setState] = useState(props)
-    const { ingredients } = state;
+    const { recipeIngredients } = state;
     const logger = getLogger("recipeIngredients");
     
     const addIngredient = () =>{
-      const id1 = ingredients.length + 1;
-      const ingredients2 = ingredients.concat({id: id1, quantity: 0, ingredient: {id: 1, name: "flour"} });
-        setState({ingredients: ingredients2});
+      const id1 = recipeIngredients.length + 1;
+      const ingredients2 = recipeIngredients.concat({id: id1, quantity: 0, ingredient: {id: 1, name: "flour"} });
+        setState({recipeIngredients: ingredients2});
     }
 
     const removeIngredient = (id: Number) => {
-      const ingredients2 = ingredients.filter(ingr => { return ingr.id !== id});
+      const ingredients2 = recipeIngredients.filter(ingr => { return ingr.id !== id});
       logger(ingredients2);
-      setState( {...state, ingredients: ingredients2} );
+      setState( {...state, recipeIngredients: ingredients2} );
     }
  
   return (  
@@ -30,7 +28,7 @@ const RecipeIngredients: React.FC<RecipeIngredientsListProps> = (props) => {
       <IonNote>Ingredients:</IonNote>
         
           <IonList id="ingredientsList">
-                { ingredients.map(({ingredient, id, quantity}) =>                
+                { recipeIngredients.map(({ingredient, id, quantity}) =>                
                  <RecipeIngredient ingredient={ingredient} quantity={quantity} id={id} removeIngredientFunction={removeIngredient}/>
                 )}             
                 <IonFabButton size="small" slot="end" color="tertiary" id="addIngredientButton" onClick={addIngredient}> <IonIcon  icon={add}></IonIcon></IonFabButton>

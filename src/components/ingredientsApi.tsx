@@ -28,8 +28,8 @@ function withLogs<T>(promise: Promise<ResponseProps<T>>, fnName: string): Promis
 
 const config = {
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+     }
 };
 
 export const getItems: () => Promise<IngredientProps[]> = () => {
@@ -42,15 +42,19 @@ export const getRecipes: () => Promise<RecipeProps[]> = () => {
   return withLogs(axios.get(recipesUrl, config), 'getRecipes');
 }
 
-/*
-export const createItem: (item: ItemProps) => Promise<ItemProps[]> = item => {
-  return withLogs(axios.post(itemUrl, item, config), 'createItem');
+export const createRecipe: (item: RecipeProps) => Promise<RecipeProps> = item => {
+  return withLogs(axios.post(recipesUrl, item, config), 'createRecipe');
 }
 
-export const updateItem: (item: ItemProps) => Promise<ItemProps[]> = item => {
-  return withLogs(axios.put(`${itemUrl}/${item.id}`, item, config), 'updateItem');
+export const updateRecipe: (item: RecipeProps) => Promise<RecipeProps> = item => {
+  return withLogs(axios.put(`${recipesUrl}`, item, config), 'updateRecipe');
 }
-*/
+
+export const removeRecipe: (id: number) => Promise<RecipeProps[]> = id => {
+  return withLogs(axios.delete(`${recipesUrl}/${id}`, config), 'removeRecipe');
+}
+
+
 interface MessageData {
   event: string;
   payload: {

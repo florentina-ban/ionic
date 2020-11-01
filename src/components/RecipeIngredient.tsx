@@ -1,9 +1,10 @@
 import { IonFabButton, IonIcon, IonInput, IonItem, IonNote, IonSelect, IonSelectOption } from "@ionic/react";
 import { trashBinOutline } from "ionicons/icons";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { getLogger } from "../core";
 import IngredientProps from "../interfaces/IngredientProp";
 import './editRecipe.css';
+import { IngredientsContext } from "./ItemProvider";
 
 interface RecipeIngredientPropsExt {
     ingredient: IngredientProps
@@ -12,23 +13,11 @@ interface RecipeIngredientPropsExt {
     removeIngredientFunction: any
 }
 
-const ingredientProvider = () =>{
-  var ingredients: IngredientProps[] = [];
-  const ingredient1 = {id: 1, name:"flour"};
-  const ingredient2 = {id: 2, name:"onion"};
-  const ingredient3 = {id: 3, name:"potatoes"};
-  const ingredient4 = {id: 4, name:"milk"};
-  ingredients.push(ingredient1);
-  ingredients.push(ingredient2);
-  ingredients.push(ingredient3);
-  ingredients.push(ingredient4);
-
-  return ingredients;
-}
-
 const logger = getLogger("recipeIngredient");
 
 const RecipeIngredient: React.FC<RecipeIngredientPropsExt> = (props) => {
+
+  const { items, fetching, fetchingError } = useContext(IngredientsContext);
   const [state, setState] = useState(props);
   const { ingredient, id, quantity, removeIngredientFunction} = state;
 
@@ -42,12 +31,12 @@ const RecipeIngredient: React.FC<RecipeIngredientPropsExt> = (props) => {
     removeIngredientFunction(id);
   }
 
- const allIngredients = ingredientProvider();
+ const allIngredients = items;
   return (
     <IonItem key={id}>
       <IonNote>{id}</IonNote>
         <IonSelect selectedText={ingredient.name} onIonChange={changeIngredient}>
-         { allIngredients.map((ingr) =>          
+         { allIngredients && allIngredients.map((ingr) =>          
                <IonSelectOption class="comboItem" value={ingr}>{ingr.name}</IonSelectOption>
           )}
       </IonSelect>
