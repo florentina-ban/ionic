@@ -2,6 +2,7 @@ import { IonFabButton, IonIcon, IonItem, IonLabel, IonNote} from '@ionic/react';
 import {  buildOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
 import React, { useState } from 'react';
 import { getLogger } from '../core';
+import RecipeProps from '../interfaces/RecipeProps';
 import RecipePropsExt from '../interfaces/RecipePropsExt';
 import './recipeList.css';
 
@@ -9,15 +10,9 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
 
     const logger = getLogger("recipe");
     logger("recipe");
-
     const [state, setState] = useState<RecipePropsExt>(props);
 
-    const addLike = () => {
-        const { likes } = state;
-        const likeNo = likes + 1;
-        setState({...state, likes: likeNo});
-    }
-    const {id, name, text, likes, recipeIngredients: ingredients, date, triedIt, origin, menuOpened} = state;
+    const {id, name, text, likes, recipeIngredients: ingredients, date, triedIt, origin, saveRecipep} = state;
 
     const onEditRecipe = () => {
         const { editRecipe } = state;
@@ -29,15 +24,14 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
         removeRecipe(id);
        
       }
-
     }
-    const openMenu = () => {
-     const { menuOpened } = state;
-     const newValue = !menuOpened ;
-     setState({...state, menuOpened: newValue});
-
+    const onSaveRecipep = () => {
+      const likes2 = likes + 1;
+      const recipe3 = { id, name, text, likes, recipeIngredients: ingredients, date, triedIt, origin};
+      saveRecipep(recipe3);
+      setState({...state, likes: likes2 }); 
     }
-
+   
   return (    
         <IonItem key={"id"+id?.toFixed()}>
           <IonLabel class="largeLabel">{name}</IonLabel>
@@ -47,7 +41,7 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
           <IonLabel class="smallLabel">{likes}</IonLabel>
 
           <div className="buttonsContainer">
-          <IonFabButton size="small" color="tertiary" onClick={addLike}>
+          <IonFabButton size="small" color="tertiary" onClick={onSaveRecipep}>
             <IonIcon icon={thumbsUp} />
           </IonFabButton>
           <IonFabButton size="small" color="tertiary">

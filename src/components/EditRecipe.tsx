@@ -17,16 +17,15 @@ interface RecipeEditProps extends RouteComponentProps<{
 const EditRecipe: React.FC<RecipeEditProps> = ({history, match}) =>  {
 
 const logger = getLogger("editRecipe");
-const { items, fetching, fetchingError } = useContext(IngredientsContext);
-const { recipes, fetchingR, fetchingErrorR, savingR, savingErrorR, saveRecipe } = useContext(RecipesContext);
-const routeId = match.params;
+const { items } = useContext(IngredientsContext);
+const { recipes, saveRecipe } = useContext(RecipesContext);
 const [currentRecipe, setRecipe] = useState<RecipeProps>();
 // const [id, setId ] =useState(0);
 // const [text, setText ] =useState("");
 // const [origin, setOrigin ] =useState("");
 // const [triedIt, setTriedIt ] =useState(false);
 // const [recipeIngredients, setIngredients ] = useState<RecipeIngredientProps[]>();
-// const [date, setDate ] =useState(new Date());
+ const [date, setDate ] =useState(new Date());
 // const [name, setName ] =useState("");
 // const [likes, setLikes ] = useState(0);
 
@@ -34,10 +33,13 @@ const [currentRecipe, setRecipe] = useState<RecipeProps>();
     logger('useEffect');
     const routeId = match.params.id || '';
     var currentRecipe = recipes?.find(it => it.id === +routeId); 
-    if (!currentRecipe)
-        currentRecipe = {id: 0, name: '',origin: '', text: '',date: new Date('01-01.2020'), likes: 0, triedIt: false, recipeIngredients: []};
+    if (!currentRecipe){
+        currentRecipe = {id: 0, name: '',origin: '', text: '',date: new Date('01-01-2020'), likes: 0, triedIt: false, recipeIngredients: []};
+        setDate(new Date('01-01-2020'));
+    }
     setRecipe(currentRecipe);
   }, [match.params.id, recipes]);
+  
   const emptyingrList: RecipeIngredientProps[] = [];
     
 const cancelEdit = () =>{
@@ -49,6 +51,7 @@ const onSaveRecipe = () => {
     if (editedRecipe)
         saveRecipe && saveRecipe(editedRecipe).then(() => history.goBack());
 }
+
     return (
         <IonPage>
             <IonHeader>
@@ -107,7 +110,7 @@ const onSaveRecipe = () => {
                         </IonItem>
                         <IonItem key="date">
                             <IonNote>Date: </IonNote>
-                            <IonDatetime slot="end" displayFormat="DD MM YYYY" placeholder="Select Date" value={currentRecipe?.date.toDateString()}
+                            <IonDatetime slot="end" displayFormat="DD MM YYYY" placeholder="Select Date" value={date.toDateString()}
                             onIonChange={e => {
                                 if (currentRecipe && e.detail.value)
                                     currentRecipe.date = new Date(e.detail.value.toString());

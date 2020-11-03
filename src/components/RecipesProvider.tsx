@@ -84,7 +84,6 @@ interface RecipeProviderProps {
   children: PropTypes.ReactNodeLike
 }
 
-
 export const RecipesProvider: React.FC<RecipeProviderProps> = ({ children }) => {
   log("inside recipe provider");
   const [state, dispatch] = useReducer(reducer, initialState);
