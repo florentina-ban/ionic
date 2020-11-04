@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonNote, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLoading, IonNote, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import './editRecipe.css';
 import { getLogger } from '../core';
 import RecipeIngredients from './RecipeIngredients';
@@ -18,7 +18,7 @@ const EditRecipe: React.FC<RecipeEditProps> = ({history, match}) =>  {
 
 const logger = getLogger("editRecipe");
 const { items } = useContext(IngredientsContext);
-const { recipes, saveRecipe } = useContext(RecipesContext);
+const { recipes, savingR, savingErrorR, saveRecipe } = useContext(RecipesContext);
 const [currentRecipe, setRecipe] = useState<RecipeProps>();
 // const [id, setId ] =useState(0);
 // const [text, setText ] =useState("");
@@ -52,6 +52,12 @@ const onSaveRecipe = () => {
         saveRecipe && saveRecipe(editedRecipe).then(() => history.goBack());
 }
 
+const onSaveRecipe2 = (newRecipe: RecipeProps) => {
+    if (newRecipe)
+        saveRecipe && saveRecipe(newRecipe).then(() => history.goBack());
+}
+
+logger(currentRecipe?.recipeIngredients);
     return (
         <IonPage>
             <IonHeader>
@@ -102,9 +108,11 @@ const onSaveRecipe = () => {
                         <IonItem key="triedIt">
                             <IonNote>Tried it: </IonNote>
                             <IonCheckbox color="tertiary" slot="end" checked={currentRecipe?.triedIt} onIonChange={e => {
-                                if (currentRecipe) 
-                                    currentRecipe.triedIt = e.detail.value.checked;
-                                setRecipe(currentRecipe);
+                                logger(e);
+                                 if (currentRecipe) 
+                                     currentRecipe.triedIt = e.detail.checked;
+                                logger(e.detail.checked);
+                                 setRecipe(currentRecipe);
                              
                                 } }/>
                         </IonItem>
@@ -119,8 +127,14 @@ const onSaveRecipe = () => {
                             }}> </IonDatetime>
                         </IonItem> 
                          <IonItem>                    
-                            <RecipeIngredients recipeIngredients={currentRecipe?.recipeIngredients? currentRecipe?.recipeIngredients : emptyingrList}></RecipeIngredients>  
+                        { currentRecipe && <RecipeIngredients recipeIngredients={currentRecipe.recipeIngredients}></RecipeIngredients>  } 
                         </IonItem>
+
+                        <IonLoading isOpen={savingR} />
+                            {savingErrorR && (
+                            <div>{savingErrorR.message || 'Failed to save item'}</div>
+                            )}
+
                         <div key="ButtonItem" id="buttonItem">
                             <IonFabButton size="small" color="tertiary" onClick={cancelEdit}><IonIcon icon={closeCircleOutline}></IonIcon></IonFabButton>
                             <IonFabButton size="small" color="tertiary"><IonIcon icon={checkmarkDone} onClick={onSaveRecipe}></IonIcon></IonFabButton>
