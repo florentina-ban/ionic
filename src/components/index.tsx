@@ -1,2 +1,2 @@
-export { default as EditRecipe } from './EditRecipe';
-export { default as RecipeList } from './RecipeList';
+export { default as EditRecipe } from './edit/EditRecipe';
+export { default as RecipeList } from './list/RecipeList';

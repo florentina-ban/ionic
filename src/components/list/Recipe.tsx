@@ -1,39 +1,40 @@
 import { IonFabButton, IonIcon, IonItem, IonLabel, IonNote} from '@ionic/react';
 import {  buildOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
-import React, { useState } from 'react';
-import { getLogger } from '../core';
-import RecipeProps from '../interfaces/RecipeProps';
-import RecipePropsExt from '../interfaces/RecipePropsExt';
+import React from 'react';
+import { getLogger } from '../communication';
+import RecipeProps from './RecipeProps';
 import './recipeList.css';
 
-const Recipe: React.FC<RecipePropsExt> = (props) => {
+interface RecipePropsExt extends RecipeProps{
+  editRecipe: (id? : string) => void;
+  removeRecipe: (id: string) => void;
+  saveRecipep: (recipe: RecipeProps) => void;
+
+}
+
+
+const Recipe: React.FC<RecipePropsExt> = ({date, description, triedIt, name, likes, origin, id, saveRecipep, removeRecipe, editRecipe}) => {
 
     const logger = getLogger("recipe");
-    logger("recipe");
-    const [state, setState] = useState<RecipePropsExt>(props);
-
-    const {id, name, text, likes, recipeIngredients: ingredients, date, triedIt, origin, saveRecipep} = state;
 
     const onEditRecipe = () => {
-        const { editRecipe } = state;
         editRecipe(id);
     }
+ 
     const onDelete = () =>  {
-      const {removeRecipe} = state;
-      if (id){
-        removeRecipe(id);
-       
-      }
+      console.log(id);
+      if (id)
+        removeRecipe(id); 
     }
+ 
     const onSaveRecipep = () => {
-      const likes2 = likes + 1;
-      const recipe3 = { id, name, text, likes, recipeIngredients: ingredients, date, triedIt, origin};
+      const likes1 = likes + 1;
+      
+      const recipe3 = { id, name, description, date, triedIt, origin, likes:likes1 };
       saveRecipep(recipe3);
-      setState({...state, likes: likes2 }); 
     }
-   
-  return (    
-        <IonItem key={"id"+id?.toFixed()}>
+    return (    
+        <IonItem key={"id"+id}>
           <IonLabel class="largeLabel">{name}</IonLabel>
           <IonNote>Origin</IonNote>
           <IonLabel class="normalLabel">{origin}</IonLabel>
@@ -44,12 +45,12 @@ const Recipe: React.FC<RecipePropsExt> = (props) => {
           <IonFabButton size="small" color="tertiary" onClick={onSaveRecipep}>
             <IonIcon icon={thumbsUp} />
           </IonFabButton>
-          <IonFabButton size="small" color="tertiary">
+           <IonFabButton size="small" color="tertiary">
             <IonIcon icon={buildOutline}  onClick={onEditRecipe}/>
           </IonFabButton>
           <IonFabButton size="small" color="tertiary" onClick={onDelete}>
             <IonIcon icon={trashBinOutline} />
-          </IonFabButton>
+          </IonFabButton> 
           
           </div>    
         </IonItem>

@@ -1,14 +1,12 @@
-import RecipeIngredientProps from './RecipeIngredientProps';
 
 interface RecipeProps {
-    id: number;
+    id?: string;
     name: string;
     origin: string;
     date: Date;
-    text: string;
+    description: string;
     triedIt: boolean;
     likes: number;
-    recipeIngredients: RecipeIngredientProps[];
 }
 
 export default RecipeProps;

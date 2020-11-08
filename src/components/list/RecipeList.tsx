@@ -1,45 +1,33 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { IonCard, IonCardContent, IonCardTitle, IonContent, IonFabButton, IonHeader, IonIcon, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import Recipe from './Recipe';
 import './recipeList.css';
 import { RouteComponentProps } from 'react-router';
-import RecipeProps from '../interfaces/RecipeProps';
-import { getLogger } from '../core';
+import RecipeProps from './RecipeProps';
+import { getLogger } from '../communication';
 import { add } from 'ionicons/icons';
-import { IngredientsContext } from './ItemProvider';
-import { RecipesContext } from './RecipesProvider';
+import { RecipeContext } from '../communication/RecipesProvider';
 
 const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     const logger = getLogger("RecipeList");
-    logger("inside recipe list");
-    
-    const { items } = useContext(IngredientsContext);
-    //logger(items);
-
-    const { recipes, saveRecipe, deleteRecipe } = useContext(RecipesContext);
-    //logger(recipes);
-    
-    const [state, setRecipes] = useState({        
-        recipes, allingredients: items});
-
+    const { recipes, saveRecipe: saveRecipe, deleteRecipe } = useContext(RecipeContext);
+  
     const addRecipe = () => {
         history.push("/item")
-        logger("in add recipe");
     }
-    const removeRecipeIns = (id: number) => {
+
+    const removeRecipeIns = (id: string) => {    
         if (recipes && id && deleteRecipe){
-        logger("inside removeRecipe")
         deleteRecipe(id);
         }
     }
 
     const saveRecipeIns = (recipe: RecipeProps) => {
         if (recipes && recipe && saveRecipe){
-        logger("inside removeRecipe")
         saveRecipe(recipe);
         }
     }
-      
+
     return (  
         <IonPage>
             <IonHeader>
@@ -52,10 +40,12 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
                     <IonCardTitle class="cardTitle">My recipes</IonCardTitle>
                     <IonCardContent >
                         <IonList >
-                        {recipes && recipes.map(({id, text, name, likes, recipeIngredients: ingredients, origin, date, triedIt}) => 
-                        <Recipe key={id} id={id} origin={origin} recipeIngredients={ingredients} date={date} triedIt={triedIt} name={name} text={text} likes={likes} menuOpened={false}
+                        {recipes && recipes.map( ({id, description, name, likes, origin, date, triedIt}) => 
+                        <Recipe key={id} id={id} origin={origin} date={date} triedIt={triedIt} name={name} description={description} likes={likes}
                         editRecipe={id => history.push(`/item/${id}`)}
-                        removeRecipe={id => removeRecipeIns(id)} saveRecipep={saveRecipeIns} />
+                        saveRecipep={saveRecipeIns} 
+                        removeRecipe={removeRecipeIns}
+                        />
                         )} 
                         <IonFabButton id="addButton" color="tertiary" onClick={addRecipe}> <IonIcon icon={add}></IonIcon></IonFabButton>                     
                         </IonList>

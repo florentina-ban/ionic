@@ -22,12 +22,10 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import { RecipeList, EditRecipe } from './components';
-import { ItemProvider } from './components/ItemProvider';
-import { RecipesProvider } from './components/RecipesProvider';
+import { RecipesProvider } from './components/communication/RecipesProvider';
 
 const App: React.FC = () => (
   <IonApp>
-    <ItemProvider>
       <RecipesProvider>
     <IonReactRouter>
       <IonRouterOutlet>
@@ -38,7 +36,6 @@ const App: React.FC = () => (
       </IonRouterOutlet>
     </IonReactRouter>
     </RecipesProvider>
-    </ItemProvider>
   </IonApp>
 );
 
