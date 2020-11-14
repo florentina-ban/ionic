@@ -1,11 +1,12 @@
 import axios from 'axios';
-import { getLogger } from '.';
+import { getLogger } from '../../core/logger';
+import { authConfig } from '../auth/authApi';
 import RecipeProps from '../list/RecipeProps';
 
 const log = getLogger('recipeApi');
+export const baseUrl = 'localhost:3000';
 
-const baseUrl = 'localhost:3000';
-const recipeUrl = `http://${baseUrl}/recipe`;
+const recipeUrl = `http://${baseUrl}/api/recipe`;
 
 interface ResponseProps<T> {
   data: T;
@@ -24,25 +25,20 @@ function withLogs<T>(promise: Promise<ResponseProps<T>>, fnName: string): Promis
     });
 }
 
-const config = {
-  headers: {
-    'Content-Type': 'application/json'
-  }
-};
 
-export const getItems: () => Promise<RecipeProps[]> = () => {
-  return withLogs(axios.get(recipeUrl, config), 'getItems');
+export const getItems: (token: string) => Promise<RecipeProps[]> = (token) => {
+  return withLogs(axios.get(recipeUrl, authConfig(token)), 'getItems');
 }
 
-export const createItem: (recipe: RecipeProps) => Promise<RecipeProps[]> = recipe => {
-  return withLogs(axios.post(recipeUrl, recipe, config), 'createItem');
+export const createItem: (token: string, recipe: RecipeProps) => Promise<RecipeProps[]> = (token, recipe) => {
+  return withLogs(axios.post(recipeUrl, recipe, authConfig(token)), 'createItem');
 }
 
-export const updateItem: (recipe: RecipeProps) => Promise<RecipeProps[]> = recipe => {
-  return withLogs(axios.put(`${recipeUrl}/${recipe.id}`, recipe, config), 'updateItem');
+export const updateItem: (token:string, recipe: RecipeProps) => Promise<RecipeProps[]> = (token, recipe) => {
+  return withLogs(axios.put(`${recipeUrl}/${recipe._id}`, recipe, authConfig(token)), 'updateItem');
 }
-export const deleteItem: (id: string) => Promise<RecipeProps> = id => {
-  return withLogs(axios.delete(`${recipeUrl}/${id}`, config), 'deleteItem');
+export const deleteItem: (token: string, id: string) => Promise<RecipeProps> = (token, id) => {
+  return withLogs(axios.delete(`${recipeUrl}/${id}`, authConfig(token)), 'deleteItem');
 }
 
 interface MessageData {
@@ -52,10 +48,11 @@ interface MessageData {
   };
 }
 
-export const newWebSocket = (onMessage: (data: MessageData) => void) => {
-  const ws = new WebSocket(`ws://${baseUrl}`)
+export const newWebSocket = (token: string, onMessage: (data: MessageData) => void) => {
+  const ws = new WebSocket(`ws://${baseUrl}`);
   ws.onopen = () => {
     log('web socket onopen');
+    ws.send(JSON.stringify({ type: 'authorization', payload: { token } }));
   };
   ws.onclose = () => {
     log('web socket onclose');

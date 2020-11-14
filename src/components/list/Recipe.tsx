@@ -1,40 +1,40 @@
 import { IonFabButton, IonIcon, IonItem, IonLabel, IonNote} from '@ionic/react';
 import {  buildOutline, thumbsUp, trashBinOutline } from 'ionicons/icons';
 import React from 'react';
-import { getLogger } from '../communication';
+import { getLogger } from '../../core/logger';
 import RecipeProps from './RecipeProps';
 import './recipeList.css';
 
 interface RecipePropsExt extends RecipeProps{
-  editRecipe: (id? : string) => void;
-  removeRecipe: (id: string) => void;
+  editRecipe: (_id? : string) => void;
+  removeRecipe: (_id: string) => void;
   saveRecipep: (recipe: RecipeProps) => void;
 
 }
 
 
-const Recipe: React.FC<RecipePropsExt> = ({date, description, triedIt, name, likes, origin, id, saveRecipep, removeRecipe, editRecipe}) => {
+const Recipe: React.FC<RecipePropsExt> = ({date, description, triedIt, name, likes, origin, _id, saveRecipep, removeRecipe, editRecipe}) => {
 
     const logger = getLogger("recipe");
 
     const onEditRecipe = () => {
-        editRecipe(id);
+        editRecipe(_id);
     }
  
     const onDelete = () =>  {
-      console.log(id);
-      if (id)
-        removeRecipe(id); 
+     // console.log(id);
+      if (_id)
+        removeRecipe(_id); 
     }
  
     const onSaveRecipep = () => {
       const likes1 = likes + 1;
       
-      const recipe3 = { id, name, description, date, triedIt, origin, likes:likes1 };
+      const recipe3 = { _id, name, description, date, triedIt, origin, likes:likes1 };
       saveRecipep(recipe3);
     }
     return (    
-        <IonItem key={"id"+id}>
+        <IonItem key={_id}>
           <IonLabel class="largeLabel">{name}</IonLabel>
           <IonNote>Origin</IonNote>
           <IonLabel class="normalLabel">{origin}</IonLabel>

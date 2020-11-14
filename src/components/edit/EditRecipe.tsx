@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLoading, IonNote, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import './editRecipe.css';
-import { getLogger } from '../communication';
+import { getLogger } from '../../core/logger';
 import RecipeProps from '../list/RecipeProps';
 import { checkmarkDone, closeCircleOutline } from 'ionicons/icons';
 import { RecipeContext } from '../communication/RecipesProvider';
@@ -19,19 +19,18 @@ const EditRecipe: React.FC<RecipeEditProps> = ({history, match}) =>  {
     const [description, setDescription ] =useState("");
     const [origin, setOrigin ] =useState("");
     const [triedIt, setTriedIt ] =useState(false);
-    const [date, setDate ] =useState(new Date());
-    const [name, setName ] =useState("");
+
+    const [date, setDate ] = useState(new Date());
+    const [name, setName ] = useState("");
     const [likes, setLikes ] = useState(0);
     const [id, setId] = useState<string>();
 
  useEffect(() => {
-    logger('useEffect');
     const routeId = match.params.id || '';
-    var currentRecipe = recipes?.find(it => it.id == routeId); 
-    logger(currentRecipe);
+    var currentRecipe = recipes?.find(it => it._id == routeId); 
     setRecipe(currentRecipe);
     if (currentRecipe){
-        setId(currentRecipe.id);
+        setId(currentRecipe._id);
         setDescription(currentRecipe.description);
         setOrigin(currentRecipe.origin);
         setName(currentRecipe.name);
@@ -45,10 +44,20 @@ const cancelEdit = () =>{
     history.push('/home');    
 }
 const onSaveRecipe = () => {
-    const editedRecipe = currentRecipe ? { ...currentRecipe, description, name, origin, date, triedIt, likes } : { description, name, origin, date, triedIt, likes };
-    logger(editedRecipe);
-    if (editedRecipe)
+    if (currentRecipe){
+        currentRecipe.date = date;
+        const editedRecipe = { ...currentRecipe, description, name, origin, triedIt, likes };
+        logger(editedRecipe)
+        if (editedRecipe)
+            saveRecipe && saveRecipe(editedRecipe).then(() => history.goBack());
+    }
+    else{
+      
+        const editedRecipe = { description, name, origin, date, triedIt, likes };
+        logger(editedRecipe)
+            if (editedRecipe)
         saveRecipe && saveRecipe(editedRecipe).then(() => history.goBack());
+    }
 }
 
     return (
@@ -64,8 +73,7 @@ const onSaveRecipe = () => {
                     <IonCardContent id="cardContent">   
                          <IonItem key="name">
                             <IonNote>Name: </IonNote>
-                            <IonInput class="textRight" slot="end" value={name} onIonChange={e => 
-                               
+                            <IonInput class="textRight" slot="end" value={name} onIonChange={e =>                                
                                     setName(e.detail.value || '')}/>
                         </IonItem>      
                         <IonItem key="origin">
@@ -97,8 +105,6 @@ const onSaveRecipe = () => {
                             onIonChange={e => {
                                 if (e.detail.value)
                                     setDate(new Date(e.detail.value));
-                                else
-                                    setDate(new Date);
                             }}> </IonDatetime>
                         </IonItem>  
                         

@@ -4,7 +4,7 @@ import Recipe from './Recipe';
 import './recipeList.css';
 import { RouteComponentProps } from 'react-router';
 import RecipeProps from './RecipeProps';
-import { getLogger } from '../communication';
+import { getLogger } from '../../core/logger';
 import { add } from 'ionicons/icons';
 import { RecipeContext } from '../communication/RecipesProvider';
 
@@ -40,8 +40,8 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
                     <IonCardTitle class="cardTitle">My recipes</IonCardTitle>
                     <IonCardContent >
                         <IonList >
-                        {recipes && recipes.map( ({id, description, name, likes, origin, date, triedIt}) => 
-                        <Recipe key={id} id={id} origin={origin} date={date} triedIt={triedIt} name={name} description={description} likes={likes}
+                        {recipes && recipes.map( ({_id: id, description, name, likes, origin, date, triedIt}) => 
+                        <Recipe key={id} _id={id} origin={origin} date={date} triedIt={triedIt} name={name} description={description} likes={likes}
                         editRecipe={id => history.push(`/item/${id}`)}
                         saveRecipep={saveRecipeIns} 
                         removeRecipe={removeRecipeIns}

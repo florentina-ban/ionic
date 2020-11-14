@@ -1,6 +1,6 @@
 
 interface RecipeProps {
-    id?: string;
+    _id?: string;
     name: string;
     origin: string;
     date: Date;

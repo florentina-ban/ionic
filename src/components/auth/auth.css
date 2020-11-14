@@ -1,0 +1,24 @@
+
+#loginCard{
+    height: 45%;
+    width: 40%;
+    margin: 0 auto;
+    margin-top: 5%;
+}
+#cardTitle{
+    margin: 6%;
+}
+#cardContent{
+    margin-left: 10%;
+}
+#loginButton{
+    margin-left: 15%;
+    margin-top: 10%;
+}
+#registerButton{
+    margin-left: 15%;
+    margin-top: 10%;
+}
+#errorText{
+    color: red;
+}

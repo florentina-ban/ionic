@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { getLogger } from '.';
+import { getLogger } from '../../core/logger';
 import RecipeProps from '../list/RecipeProps';
 import { createItem, deleteItem, getItems, newWebSocket, updateItem } from './recipeApi';
+import { AuthContext } from '../auth/authProvider';
 
-const log = getLogger('ItemProvider');
+const log = getLogger('RecipeProvider');
 
 type SaveRecipeFn = (recipe: RecipeProps) => Promise<any>;
 type DeleteRecipeFn = (id: string) => Promise<any>;
@@ -53,9 +54,11 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         return { ...state, savingError: null, saving: true };
       case SAVE_RECIPE_SUCCEEDED:
         const recipes = [...(state.recipes || [])];
+        //log(payload.recipe)
         const recipe = payload.recipe;
-        const index = recipes.findIndex(it => it.id == recipe.id);
-        log(index)
+        const index = recipes.findIndex(it => it._id == recipe._id);
+        //log(index)
+        console.log(recipe)
         if (index === -1) {
           
           recipes.splice(0, 0, recipe);
@@ -75,9 +78,9 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         const recipes1 = [...(state.recipes || [])];
         const recipe1 = payload.recipe;
         
-        const index1 = recipes1.findIndex(it => it.id == recipe1.id);
-        log(index1);
-        log(recipe1);
+        const index1 = recipes1.findIndex(it => it._id == recipe1._id);
+        //log(index1);
+        //log(recipe1);
         recipes1.splice(index1, 1);
         return { ...state, recipes:recipes1, saving: false };
       case DELETE_RECIPE_FAILED:
@@ -94,16 +97,17 @@ interface ItemProviderProps {
 }
 
 export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
+  const { token } = useContext(AuthContext);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { recipes, fetching, fetchingError, saving, savingError } = state;
-  useEffect(getItemsEffect, []);
-  useEffect(wsEffect, []);
-  const saveRecipe = useCallback<SaveRecipeFn>(saveRecipeCallback, []);
-  const deleteRecipe = useCallback<DeleteRecipeFn>(deleteRecipeCallback, []);
+  useEffect(getItemsEffect, [token]);
+  useEffect(wsEffect, [token]);
+  const saveRecipe = useCallback<SaveRecipeFn>(saveRecipeCallback, [token]);
+  const deleteRecipe = useCallback<DeleteRecipeFn>(deleteRecipeCallback, [token]);
 
   const value = { recipes, fetching, fetchingError, saving, savingError, saveRecipe: saveRecipe, deleteRecipe };
   
-  log(value);
+  //log(value);
   return (
     <RecipeContext.Provider value={value}>
       {children}
@@ -118,10 +122,13 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
     }
 
     async function fetchItems() {
+      if (!token?.trim()) {
+        return;
+      }
       try {
         log('fetchItems started');
         dispatch({ type: FETCH_RECIPES_STARTED });
-        const recipes = await getItems();
+        const recipes = await getItems(token);
         log('fetchItems succeeded');
         if (!canceled) {
           dispatch({ type: FETCH_RECIPES_SUCCEEDED, payload: { recipes } });
@@ -137,7 +144,8 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
     try {
       log('saveRecipe started');
       dispatch({ type: SAVE_RECIPE_STARTED });
-      const savedRecipe = await (recipe.id ? updateItem(recipe) : createItem(recipe));
+      //log(recipe)
+      const savedRecipe = await (recipe._id ? updateItem(token, recipe) : createItem(token, recipe));
       log('saveRecipe succeeded');
       dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe: savedRecipe } });
     } catch (error) {
@@ -150,9 +158,9 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
     try {
       log('deleteRecipe started');
       dispatch({ type: DELETE_RECIPE_STARTED });
-      const deletedRecipe = await (deleteItem(id));
-      log("-----------")
-      log(deletedRecipe);
+      const deletedRecipe = await (deleteItem(token, id));
+      //log("-----------")
+      //log(deletedRecipe);
       
       log('deleteRecipe succeeded');
       dispatch({ type: DELETE_RECIPE_SUCCEEDED, payload: { recipe: deletedRecipe } });
@@ -166,20 +174,23 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
   function wsEffect() {
     let canceled = false;
     log('wsEffect - connecting');
-    const closeWebSocket = newWebSocket(message => {
-      if (canceled) {
-        return;
-      }
-      const { event, payload: { recipe }} = message;
-      log(`ws message, recipe ${event}`);
-      if (event === 'created' || event === 'updated') {
-        dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe } });
-      }
-    });
+    let closeWebSocket: () => void;
+    if (token?.trim()) {
+      closeWebSocket = newWebSocket(token, message => {
+        if (canceled) {
+          return;
+        }
+        const { event, payload: recipe } = message;
+        log(`ws message, recipe ${event}`);
+        if (event === 'created' || event === 'updated') {
+          dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe } });
+        }
+      });
+    }
     return () => {
       log('wsEffect - disconnecting');
       canceled = true;
-      closeWebSocket();
+      closeWebSocket?.();
     }
   }
 };
