@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import { getLogger } from './../../core/logger';
 import { login as loginApi } from './authApi';
 import { register as registerApi } from './authApi';
+import { set as setStorage, get as getStorage, clear as clearStorage } from './../localStorage/localStorageApi';
 
 const log = getLogger('AuthProvider');
 
 type LoginFn = (username?: string, password?: string) => void;
+type LogoutFn = () => void;
 type RegisterFn = (username?: string, password?: string) => void;
 
 
@@ -19,6 +21,7 @@ export interface AuthState {
   registerError: Error | null;
   login?: LoginFn;
   register?: RegisterFn;
+  logout? : LogoutFn;
   pendingAuthentication?: boolean;
   pendingRegistration?:boolean;
   username?: string;
@@ -49,11 +52,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const { isAuthenticated, isAuthenticating, authenticationError,isRegistered, isRegistering, registerError, pendingAuthentication,pendingRegistration, token } = state;
   const login = useCallback<LoginFn>(loginCallback, []);
   const register = useCallback<RegisterFn>(registerCallback, []);
+  const logout = useCallback<LogoutFn>(logoutCallback, []);
 
   useEffect(authenticationEffect, [pendingAuthentication]);
-
   useEffect(registerEffect, [pendingRegistration]);
-  const value = { isAuthenticated,isRegistered, isRegistering, registerError,  login, register, isAuthenticating, authenticationError, token };
+  useEffect(localStorageEffect, [pendingAuthentication]);
+
+
+  const value = { isAuthenticated,isRegistered, isRegistering, registerError, login, logout, register, isAuthenticating, authenticationError, token };
   log('render');
   return (
     <AuthContext.Provider value={value}>
@@ -78,7 +84,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       pendingRegistration: true,
       username,
       password
-    });   //se schimba state-ul dar nu mai are loc callul de register effect
+    });   
+  }
+  function logoutCallback(): void {
+    log('logout');
+    clearStorage();
+    setState({
+      isAuthenticated: false,
+      isAuthenticating: false,
+      authenticationError: null,
+      isRegistered: false,
+      isRegistering: false,
+      registerError: null,
+      pendingAuthentication: false,
+      pendingRegistration: false,
+      token: '',
+    });   
+  }
+
+  function localStorageEffect(){
+    
+    getToken();
+    async function getToken() {    
+      getStorage('token').then(function (res) {
+        if ( res.value && res.value.length>0){
+            const { myValue } = JSON.parse(res.value);
+            log("token: ", myValue);
+            log("token_res: ", res);
+            const token  = myValue;
+            setState({
+              ...state,
+              token,
+              pendingRegistration: false,
+              isAuthenticated: true,
+              isAuthenticating: false,  
+          });
+        }
+      });
+    }
   }
 
   function registerEffect() {
@@ -105,6 +148,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
         log('register succeeded');
+        setStorage('token', token);
         setState({
           ...state,
           token,
@@ -155,6 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
         log('authenticate succeeded');
+        setStorage('token',token);
         setState({
           ...state,
           token,
@@ -176,4 +221,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }
   }
+ 
 };

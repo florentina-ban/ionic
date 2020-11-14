@@ -5,13 +5,15 @@ import './recipeList.css';
 import { RouteComponentProps } from 'react-router';
 import RecipeProps from './RecipeProps';
 import { getLogger } from '../../core/logger';
-import { add } from 'ionicons/icons';
+import { add, logOut } from 'ionicons/icons';
 import { RecipeContext } from '../communication/RecipesProvider';
+import { AuthContext } from '../auth/authProvider';
 
 const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     const logger = getLogger("RecipeList");
     const { recipes, saveRecipe: saveRecipe, deleteRecipe } = useContext(RecipeContext);
-  
+    const { logout } = useContext(AuthContext);
+
     const addRecipe = () => {
         history.push("/item")
     }
@@ -26,6 +28,10 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
         if (recipes && recipe && saveRecipe){
         saveRecipe(recipe);
         }
+    }
+    const logOutFunc = () =>  {
+        logout && logout();
+        history.push("/login")
     }
 
     return (  
@@ -47,8 +53,11 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
                         removeRecipe={removeRecipeIns}
                         />
                         )} 
-                        <IonFabButton id="addButton" color="tertiary" onClick={addRecipe}> <IonIcon icon={add}></IonIcon></IonFabButton>                     
                         </IonList>
+                        <div id ="buttonsDiv">
+                            <IonFabButton id="addButton" color="tertiary" onClick={logOutFunc}> <IonIcon icon={logOut}></IonIcon></IonFabButton>                     
+                            <IonFabButton id="addButton" color="tertiary" onClick={addRecipe}> <IonIcon icon={add}></IonIcon></IonFabButton>                     
+                        </div>
                     </IonCardContent>
                 </IonCard>
             </IonContent>
