@@ -4,8 +4,12 @@ import { getLogger } from '../../core/logger';
 import RecipeProps from '../list/RecipeProps';
 import { createItem, deleteItem, getItems, newWebSocket, updateItem } from './recipeApi';
 import { AuthContext } from '../auth/authProvider';
+import { addToStorage, getFromStorage, getListFromStorage, clear as clearStorage } from '../localStorage/localStorageApi';
+import { useNetwork } from './useNetwork';
+import Login from '../auth/login';
 
 const log = getLogger('RecipeProvider');
+
 
 type SaveRecipeFn = (recipe: RecipeProps) => Promise<any>;
 type DeleteRecipeFn = (id: string) => Promise<any>;
@@ -32,6 +36,7 @@ const initialState: RecipesState = {
 
 const FETCH_RECIPES_STARTED = 'FETCH_RECIPES_STARTED';
 const FETCH_RECIPES_SUCCEEDED = 'FETCH_RECIPES_SUCCEEDED';
+const FETCH_RECIPES_SUCCEEDED_STORAGE = 'FETCH_RECIPES_SUCCEEDED_STORAGE';
 const FETCH_RECIPES_FAILED = 'FETCH_RECIPES_FAILED';
 const SAVE_RECIPE_STARTED = 'SAVE_RECIPE_STARTED';
 const SAVE_RECIPE_SUCCEEDED = 'SAVE_RECIPE_SUCCEEDED';
@@ -46,7 +51,13 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
       case FETCH_RECIPES_STARTED:
         return { ...state, fetching: true, fetchingError: null };
       case FETCH_RECIPES_SUCCEEDED:
+        log("in reducer "+ payload.recipes)
+        addToStorage("recipes", payload.recipes);
         return { ...state, recipes: payload.recipes, fetching: false };
+      case FETCH_RECIPES_SUCCEEDED_STORAGE:
+          log("in reducer from storage"+ JSON.stringify(payload.recipes[0]))
+          addToStorage("recipes", payload.recipes);
+          return { ...state, recipes: payload.recipes, fetching: false };
       case FETCH_RECIPES_FAILED:
         return { ...state, fetchingError: payload.error, fetching: false };
 
@@ -54,13 +65,10 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         return { ...state, savingError: null, saving: true };
       case SAVE_RECIPE_SUCCEEDED:
         const recipes = [...(state.recipes || [])];
-        //log(payload.recipe)
         const recipe = payload.recipe;
         const index = recipes.findIndex(it => it._id == recipe._id);
-        //log(index)
         console.log(recipe)
-        if (index === -1) {
-          
+        if (index === -1) {     
           recipes.splice(0, 0, recipe);
         } else {
           recipes[index] = recipe;
@@ -68,6 +76,7 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         let recipes3: RecipeProps[] = [];
         recipes.forEach(x=>recipes3.push(x));
         log(recipes3);
+        addToStorage("recipes", recipes3);
         return { ...state, recipes:recipes3, saving: false };
       case SAVE_RECIPE_FAILED:
         return { ...state, savingError: payload.error, saving: false };
@@ -79,16 +88,16 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         const recipe1 = payload.recipe;
         
         const index1 = recipes1.findIndex(it => it._id == recipe1._id);
-        //log(index1);
-        //log(recipe1);
         recipes1.splice(index1, 1);
-        return { ...state, recipes:recipes1, saving: false };
+        addToStorage("recipes", recipes1);
+        return { ...state, recipes: recipes1, saving: false };
       case DELETE_RECIPE_FAILED:
         return { ...state, fetchingError: payload.error, fetching: false };
       default:
         return state;
     }
   };
+  //clearStorage();
 
 export const RecipeContext = React.createContext<RecipesState>(initialState);
 
@@ -98,6 +107,7 @@ interface ItemProviderProps {
 
 export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
   const { token } = useContext(AuthContext);
+  const {networkStatus} = useNetwork();
   const [state, dispatch] = useReducer(reducer, initialState);
   const { recipes, fetching, fetchingError, saving, savingError } = state;
   useEffect(getItemsEffect, [token]);
@@ -107,7 +117,6 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
 
   const value = { recipes, fetching, fetchingError, saving, savingError, saveRecipe: saveRecipe, deleteRecipe };
   
-  //log(value);
   return (
     <RecipeContext.Provider value={value}>
       {children}
@@ -115,28 +124,52 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
   );
 
   function getItemsEffect() {
+    log("in get Items effect")
     let canceled = false;
-    fetchItems();
+    try{
+      fetchItems();
+    }catch (error){
+      log("error: "+ error);
+      fetchItemsFromStaroage(); 
+    }
     return () => {
       canceled = true;
     }
 
+  async function fetchItemsFromStaroage(){
+    log('fetchItems from storage started');
+    dispatch({ type: FETCH_RECIPES_STARTED });
+    try{
+      const myRecip = (await (getListFromStorage('recipes')));
+      log("recipes from storage:  " + myRecip)
+    
+      log('fetchItems succeeded from storage');
+      if (!canceled) {
+        dispatch({ type: FETCH_RECIPES_SUCCEEDED_STORAGE, payload: { recipes: myRecip } });
+      }       
+    }catch(error){
+      log('fetchItems failed');
+      dispatch({ type: FETCH_RECIPES_FAILED, payload: { error } });
+    }
+  }
+
     async function fetchItems() {
-      if (!token?.trim()) {
+      if (!token) {
         return;
       }
       try {
         log('fetchItems started');
         dispatch({ type: FETCH_RECIPES_STARTED });
         const recipes = await getItems(token);
-        log('fetchItems succeeded');
-        if (!canceled) {
-          dispatch({ type: FETCH_RECIPES_SUCCEEDED, payload: { recipes } });
+          if (!canceled) {
+            dispatch({ type: FETCH_RECIPES_SUCCEEDED, payload: { recipes: recipes } });
+          return;
+          } 
+        }catch(err){
+          log("error in fetch recipes: "+err)
+          fetchItemsFromStaroage()
+          //dispatch({type: FETCH_RECIPES_FAILED, payload: { error:err}});
         }
-      } catch (error) {
-        log('fetchItems failed');
-        dispatch({ type: FETCH_RECIPES_FAILED, payload: { error } });
-      }
     }
   }
 
@@ -144,10 +177,9 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
     try {
       log('saveRecipe started');
       dispatch({ type: SAVE_RECIPE_STARTED });
-      //log(recipe)
       const savedRecipe = await (recipe._id ? updateItem(token, recipe) : createItem(token, recipe));
       log('saveRecipe succeeded');
-      dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe: savedRecipe } });
+      //dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe: savedRecipe } });
     } catch (error) {
       log('saveRecipe failed');
       dispatch({ type: SAVE_RECIPE_FAILED, payload: { error } });
@@ -158,12 +190,9 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
     try {
       log('deleteRecipe started');
       dispatch({ type: DELETE_RECIPE_STARTED });
-      const deletedRecipe = await (deleteItem(token, id));
-      //log("-----------")
-      //log(deletedRecipe);
-      
+      const deletedRecipe = await (deleteItem(token, id));      
       log('deleteRecipe succeeded');
-      dispatch({ type: DELETE_RECIPE_SUCCEEDED, payload: { recipe: deletedRecipe } });
+      //dispatch({ type: DELETE_RECIPE_SUCCEEDED, payload: { recipe: deletedRecipe } });
     } catch (error) {
       log('deleteRecipe failed');
       dispatch({ type: DELETE_RECIPE_FAILED, payload: { error } });
@@ -175,7 +204,7 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
     let canceled = false;
     log('wsEffect - connecting');
     let closeWebSocket: () => void;
-    if (token?.trim()) {
+    if (token) {
       closeWebSocket = newWebSocket(token, message => {
         if (canceled) {
           return;
@@ -185,6 +214,8 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
         if (event === 'created' || event === 'updated') {
           dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe } });
         }
+        if (event === 'removed')
+          dispatch({type: DELETE_RECIPE_SUCCEEDED, payload: {recipe} });
       });
     }
     return () => {

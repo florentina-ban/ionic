@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { getLogger } from './../../core/logger';
 import { login as loginApi } from './authApi';
 import { register as registerApi } from './authApi';
-import { set as setStorage, get as getStorage, clear as clearStorage } from './../localStorage/localStorageApi';
+import { addToStorage, getFromStorage, clear as clearStorage, removeFromStorage } from './../localStorage/localStorageApi';
+import { useNetwork } from '../communication/useNetwork';
 
 const log = getLogger('AuthProvider');
 
@@ -49,6 +50,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, setState] = useState<AuthState>(initialState);
+  const { networkStatus } = useNetwork();
   const { isAuthenticated, isAuthenticating, authenticationError,isRegistered, isRegistering, registerError, pendingAuthentication,pendingRegistration, token } = state;
   const login = useCallback<LoginFn>(loginCallback, []);
   const register = useCallback<RegisterFn>(registerCallback, []);
@@ -56,10 +58,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(authenticationEffect, [pendingAuthentication]);
   useEffect(registerEffect, [pendingRegistration]);
-  useEffect(localStorageEffect, [pendingAuthentication]);
+  useEffect(localStorageEffect, []);
 
 
-  const value = { isAuthenticated,isRegistered, isRegistering, registerError, login, logout, register, isAuthenticating, authenticationError, token };
+  const value = { isAuthenticated, isRegistered, isRegistering, registerError, login, logout, register, isAuthenticating, authenticationError, token };
   log('render');
   return (
     <AuthContext.Provider value={value}>
@@ -103,14 +105,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   function localStorageEffect(){
+    if (isAuthenticated)
+      return;
     
     getToken();
     async function getToken() {    
-      getStorage('token').then(function (res) {
+      getFromStorage('token').then(function (res) {
         if ( res.value && res.value.length>0){
             const { myValue } = JSON.parse(res.value);
-            log("token: ", myValue);
-            log("token_res: ", res);
             const token  = myValue;
             setState({
               ...state,
@@ -148,7 +150,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
         log('register succeeded');
-        setStorage('token', token);
+        addToStorage('token', token);
+        addToStorage('last_token',token);
         setState({
           ...state,
           token,
@@ -186,28 +189,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         log('authenticate, !pendingAuthentication, return');
         return;
       }
-      try {
+      try {   
         log('authenticate...');
         setState({
           ...state,
           isAuthenticating: true,
         });
-        const { username, password } = state;
-        const { token } = await loginApi(username, password);
-        log("token: ", token);
-        if (canceled) {
-          return;
-        }
-        log('authenticate succeeded');
-        setStorage('token',token);
-        setState({
-          ...state,
-          token,
-          pendingAuthentication: false,
-          isAuthenticated: true,
-          isAuthenticating: false,
-        });
-      } catch (error) {
+        const token_storage = (await getFromStorage("token")).value;
+        if (token_storage){
+          log('authenticate succeeded');
+          setState({
+            ...state,
+            token: token_storage,
+            pendingAuthentication: false,
+            isAuthenticated: true,
+            isAuthenticating: false,
+            });
+          }
+          else{
+            const { username, password } = state;
+            const { token } = await loginApi(username, password);
+            if (canceled) {
+              return;
+            }
+            log('authenticate succeeded');
+            addToStorage('token',token);
+            addToStorage('last_token', token);
+            setState({
+              ...state,
+              token,
+              pendingAuthentication: false,
+              isAuthenticated: true,
+              isAuthenticating: false,
+            });
+            }
+        }catch (error) {
         if (canceled) {
           return;
         }
@@ -221,5 +237,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }
   }
- 
 };

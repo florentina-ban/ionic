@@ -1,10 +1,11 @@
 import React, { useContext, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router';
-import { IonButton, IonCard, IonCardContent, IonCardTitle, IonContent, IonHeader, IonInput, IonLoading, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonCard, IonCardContent, IonCardTitle, IonContent, IonFabButton, IonHeader, IonIcon, IonInput, IonLoading, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import { AuthContext } from './authProvider';
 import { getLogger } from '../../core/logger';
 import './auth.css'
+import { logIn, personAdd } from 'ionicons/icons';
 
 const log = getLogger('Login');
 
@@ -58,8 +59,10 @@ export const Login: React.FC<RouteComponentProps> = ({ history }) => {
               {authenticationError && (
                 <IonText id="errorText">{'Failed to authenticate: '+authenticationError.message }</IonText>
               )}
-              <IonButton id="loginButton" onClick={handleLogin}>Login</IonButton>
-              <IonButton id="registerButton" onClick={handleRegister}>Register</IonButton>
+              <div id="loginDiv">
+              <IonFabButton id="loginButton" color="tertiary" onClick={handleLogin}> <IonIcon icon={logIn}></IonIcon></IonFabButton>                     
+              <IonFabButton id="registerButton" color="tertiary" onClick={handleRegister}> <IonIcon icon={personAdd}></IonIcon></IonFabButton>                      
+              </div>            
             </IonCardContent>
         </IonCard>
       </IonContent>
