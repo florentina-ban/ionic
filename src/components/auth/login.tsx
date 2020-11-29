@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router';
-import { IonButton, IonCard, IonCardContent, IonCardTitle, IonContent, IonFabButton, IonHeader, IonIcon, IonInput, IonLoading, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonContent, IonFabButton, IonHeader, IonIcon, IonInput, IonLoading, IonPage, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import { AuthContext } from './authProvider';
 import { getLogger } from '../../core/logger';
 import './auth.css'
@@ -15,7 +15,7 @@ interface LoginState {
 }
 
 export const Login: React.FC<RouteComponentProps> = ({ history }) => {
-  const { isAuthenticated, isAuthenticating, isRegistered, isRegistering, login, register, registerError ,authenticationError } = useContext(AuthContext);
+  const { isAuthenticated, isAuthenticating, login, register ,authenticationError } = useContext(AuthContext);
   const [state, setState] = useState<LoginState>({});
   const { username, password } = state;
   const handleLogin = () => {

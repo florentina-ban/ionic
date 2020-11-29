@@ -15,7 +15,7 @@ interface RecipePropsExt extends RecipeProps{
 
 const Recipe: React.FC<RecipePropsExt> = ({date, description, triedIt, name, likes, origin, _id, saveRecipep, removeRecipe, editRecipe}) => {
 
-    const logger = getLogger("recipe");
+    //const logger = getLogger("recipe");
 
     const onEditRecipe = () => {
         editRecipe(_id);

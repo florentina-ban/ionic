@@ -12,7 +12,7 @@ interface FromStorage{
 
 // Saving ({ key: string, value: string }) => Promise<void>
 export async function addToStorage (key: string, myValue: any) {
-  log("storing: ",key, myValue);
+  //log("storing: ",key, myValue);
   return await Storage.set({
     key: key,
     value: JSON.stringify(
@@ -32,9 +32,9 @@ export async function addToStorage (key: string, myValue: any) {
 // Loading value by key ({ key: string }) => Promise<{ value: string | null }>
 export async function getListFromStorage (key: string) {
   const stringFromStorage =  (await getFromStorage(key)).value;
-  log(stringFromStorage)
+  //log(stringFromStorage)
   const val:FromStorage  = JSON.parse(stringFromStorage ? stringFromStorage : "")
-  log("get list from storage: "+val.myValue)
+  //log("get list from storage: "+val.myValue)
   
   return val.myValue;
 }
@@ -47,7 +47,7 @@ export async function getListFromStorage (key: string) {
 // Removing value by key, ({ key: string }) => Promise<void>
 export async function removeFromStorage(key: string) {
   await Storage.remove({ key: key });
-    console.log('Keys found after remove', await Storage.keys());
+    //console.log('Keys found after remove', await Storage.keys());
 }
 
 

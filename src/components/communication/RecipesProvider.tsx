@@ -66,8 +66,8 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
       case SAVE_RECIPE_SUCCEEDED:
         const recipes = [...(state.recipes || [])];
         const recipe = payload.recipe;
-        const index = recipes.findIndex(it => it._id == recipe._id);
-        console.log(recipe)
+        const index = recipes.findIndex(it => it._id === recipe._id);
+        //console.log(recipe)
         if (index === -1) {     
           recipes.splice(0, 0, recipe);
         } else {
@@ -87,7 +87,7 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         const recipes1 = [...(state.recipes || [])];
         const recipe1 = payload.recipe;
         
-        const index1 = recipes1.findIndex(it => it._id == recipe1._id);
+        const index1 = recipes1.findIndex(it => it._id === recipe1._id);
         recipes1.splice(index1, 1);
         addToStorage("recipes", recipes1);
         return { ...state, recipes: recipes1, saving: false };
@@ -124,7 +124,7 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
   );
 
   function getItemsEffect() {
-    log("in get Items effect")
+    //log("in get Items effect")
     let canceled = false;
     try{
       fetchItems();

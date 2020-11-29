@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList, IonNote, IonPage, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonNote, IonPage, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
 import Recipe from './Recipe';
 import './recipeList.css';
 import { RouteComponentProps } from 'react-router';
@@ -9,10 +9,15 @@ import { add, logOut, sync } from 'ionicons/icons';
 import { RecipeContext } from '../communication/RecipesProvider';
 import { AuthContext } from '../auth/authProvider';
 import { addToStorage } from '../localStorage/localStorageApi';
+import { useAppState } from '../communication/useAppState'
+import { useNetwork } from '../communication/useNetwork';
+import { useBackgroundTask } from '../communication/useBackgroundTask';
 
 const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     const logger = getLogger("RecipeList");
-    const { recipes, saveRecipe: saveRecipe, deleteRecipe } = useContext(RecipeContext);
+   // const { appState } = useAppState();
+    const { networkStatus } = useNetwork();
+    const { recipes, saveRecipe, deleteRecipe } = useContext(RecipeContext);
     const { logout } = useContext(AuthContext);
     const [ searchText, setSearchText ] = useState("");
     const [ likesCheck, setLikesCheck ] = useState(false);
@@ -21,23 +26,26 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     const [ displayed , setDisplayed] = useState<RecipeProps[]>([]);
     addToStorage("displayed",displayed);
 
+    useBackgroundTask(() => new Promise(resolve => {
+        console.log('My Background Task');
+        resolve();
+      }));
+
     const firstCall = () => {
         setDisplayed([])
         setPosition(0)   
         setDisableInfiniteScroll(false) 
     }
 
-    if (recipes && position==0){
-        console.log("in primul apel")
+    if (recipes && position===0){
+        //console.log("in primul apel")
         setDisplayed([...recipes.slice(0,4)]);
         setPosition(4);   
     }
 
     useEffect(firstCall, [recipes]);
 
-    async function searchNext($event: CustomEvent<void>){
-        console.log("in functie");
-     
+    async function searchNext($event: CustomEvent<void>){     
         if(recipes && position < recipes.length) {
             setDisplayed([...displayed, ...recipes.slice(position, position + 3)]);
             setPosition(position + 4);
@@ -68,7 +76,7 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
         logout && logout();
         history.push("/login")
     }
-    console.log("in recipe list"+ displayed?.length);
+    //console.log("in recipe list"+ displayed?.length);
 
     return (  
         <IonPage>
@@ -81,7 +89,10 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
               
                 <IonCard id="recipeList">
                     <IonCardTitle class="cardTitle">My recipes</IonCardTitle>
+                    
                     <IonCardContent id="cardContent">
+                    <IonCheckbox id="networkCheck" checked={networkStatus.connected}/>
+                    <IonNote>NetWork connection</IonNote>
                         <IonSearchbar value={searchText} onIonChange={e => {
                             logger(e.detail.value);
                             logger(e.detail.value?.includes('a'));

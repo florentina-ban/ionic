@@ -27,7 +27,7 @@ const EditRecipe: React.FC<RecipeEditProps> = ({history, match}) =>  {
 
  useEffect(() => {
     const routeId = match.params.id || '';
-    var currentRecipe = recipes?.find(it => it._id == routeId); 
+    var currentRecipe = recipes?.find(it => it._id === routeId); 
     setRecipe(currentRecipe);
     if (currentRecipe){
         setId(currentRecipe._id);
