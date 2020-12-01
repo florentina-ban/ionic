@@ -7,6 +7,7 @@ interface RecipeProps {
     description: string;
     triedIt: boolean;
     likes: number;
+    location?: number;
 }
 
 export default RecipeProps;

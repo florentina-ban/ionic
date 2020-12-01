@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonNote, IonPage, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardTitle, IonCheckbox, IonContent, IonFabButton, IonHeader, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonNote, IonPage, IonSearchbar, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import Recipe from './Recipe';
 import './recipeList.css';
 import { RouteComponentProps } from 'react-router';
@@ -8,7 +8,7 @@ import { getLogger } from '../../core/logger';
 import { add, logOut, sync } from 'ionicons/icons';
 import { RecipeContext } from '../communication/RecipesProvider';
 import { AuthContext } from '../auth/authProvider';
-import { addToStorage } from '../localStorage/localStorageApi';
+import { addToStorage, getFromStorage, getListFromStorage } from '../localStorage/localStorageApi';
 import { useAppState } from '../communication/useAppState'
 import { useNetwork } from '../communication/useNetwork';
 import { useBackgroundTask } from '../communication/useBackgroundTask';
@@ -16,6 +16,7 @@ import { useBackgroundTask } from '../communication/useBackgroundTask';
 const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     const logger = getLogger("RecipeList");
    // const { appState } = useAppState();
+    
     const { networkStatus } = useNetwork();
     const { recipes, saveRecipe, deleteRecipe } = useContext(RecipeContext);
     const { logout } = useContext(AuthContext);
@@ -26,11 +27,6 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     const [ displayed , setDisplayed] = useState<RecipeProps[]>([]);
     addToStorage("displayed",displayed);
 
-    useBackgroundTask(() => new Promise(resolve => {
-        console.log('My Background Task');
-        resolve();
-      }));
-
     const firstCall = () => {
         setDisplayed([])
         setPosition(0)   
@@ -38,7 +34,6 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
     }
 
     if (recipes && position===0){
-        //console.log("in primul apel")
         setDisplayed([...recipes.slice(0,4)]);
         setPosition(4);   
     }
@@ -60,26 +55,50 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
         history.push("/item")
     }
 
-    const removeRecipeIns = (id: string) => {    
+    const removeRecipeIns = (id: string) => { 
+        console.log("in remove rec")   
+        console.log(recipes)
+        console.log(id)
+        console.log(deleteRecipe)
         if (recipes && id && deleteRecipe){
-        deleteRecipe(id);
+            deleteRecipe(id);
         }
     }
 
     const saveRecipeIns = (recipe: RecipeProps) => {
+        console.log("in save function")
         if (recipes && recipe && saveRecipe){
         saveRecipe(recipe);
         }
     }
+  
+        useBackgroundTask ( () => new Promise(resolve => {
+        console.log("inside promise");
+        if (networkStatus.connected){
+            getListFromStorage("local_data").then(x=>{
+                if (x)
+                x.forEach(recipe => {
+                    if (recipe.location ===1){
+                       saveRecipe && saveRecipe(recipe)
+                    }
+                    if (recipe.location ===2){
+                        saveRecipe && saveRecipe(recipe)
+                    }
+                    if (recipe.location ===3){
+                        deleteRecipe && deleteRecipe(recipe._id || "")
+                    }
+                });
+            }).then(x=>{addToStorage("local_data",[])})
+        }
+        resolve()
+        }))
 
     const logOutFunc = () =>  {
         logout && logout();
         history.push("/login")
     }
-    //console.log("in recipe list"+ displayed?.length);
-
     return (  
-        <IonPage>
+        <IonPage id = "mainPage">
             <IonHeader>
                 <IonToolbar color="tertiary">
                   <IonTitle>Cool Recipies App</IonTitle>
@@ -93,7 +112,9 @@ const RecipeList: React.FC<RouteComponentProps> = ({history, match}) =>  {
                     <IonCardContent id="cardContent">
                     <IonCheckbox id="networkCheck" checked={networkStatus.connected}/>
                     <IonNote>NetWork connection</IonNote>
-                        <IonSearchbar value={searchText} onIonChange={e => {
+                     {/* { mySavErr && (
+                    <IonText id="errorText2">Failed to save item</IonText> ) } */}
+                    <IonSearchbar value={searchText} onIonChange={e => {
                             logger(e.detail.value);
                             logger(e.detail.value?.includes('a'));
                             setSearchText(e.detail.value!)}

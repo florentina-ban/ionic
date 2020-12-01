@@ -9,27 +9,24 @@ interface RecipePropsExt extends RecipeProps{
   editRecipe: (_id? : string) => void;
   removeRecipe: (_id: string) => void;
   saveRecipep: (recipe: RecipeProps) => void;
-
 }
-
 
 const Recipe: React.FC<RecipePropsExt> = ({date, description, triedIt, name, likes, origin, _id, saveRecipep, removeRecipe, editRecipe}) => {
 
-    //const logger = getLogger("recipe");
+    const logger = getLogger("recipe");
 
     const onEditRecipe = () => {
         editRecipe(_id);
     }
  
     const onDelete = () =>  {
-     // console.log(id);
       if (_id)
         removeRecipe(_id); 
     }
  
     const onSaveRecipep = () => {
+      logger("inside savePep")
       const likes1 = likes + 1;
-      
       const recipe3 = { _id, name, description, date, triedIt, origin, likes:likes1 };
       saveRecipep(recipe3);
     }

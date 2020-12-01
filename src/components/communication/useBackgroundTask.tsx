@@ -1,16 +1,21 @@
 import { useEffect } from 'react';
 import { Plugins } from '@capacitor/core';
+import { getLogger } from '../../core/logger';
+import { useNetwork } from '../communication/useNetwork';
 
-const { BackgroundTask } = Plugins;
-
+const { App, BackgroundTask } = Plugins;
+const log =  getLogger( "Backgound");
 export const useBackgroundTask = (asyncTask: () => Promise<void>) => {
+  const { networkStatus } = useNetwork();
+
   useEffect(() => {
     let taskId = BackgroundTask.beforeExit(async () => {
-      console.log('useBackgroundTask - executeTask started');
+     log('useBackgroundTask - executeTask started');
       await asyncTask();
-      console.log('useBackgroundTask - executeTask finished');
+      log('useBackgroundTask - executeTask finished');
+     
       BackgroundTask.finish({ taskId });
     });
-  }, [])
+  }, [networkStatus.connected])
   return {};
 };

@@ -6,7 +6,6 @@ import { createItem, deleteItem, getItems, newWebSocket, updateItem } from './re
 import { AuthContext } from '../auth/authProvider';
 import { addToStorage, getFromStorage, getListFromStorage, clear as clearStorage } from '../localStorage/localStorageApi';
 import { useNetwork } from './useNetwork';
-import Login from '../auth/login';
 
 const log = getLogger('RecipeProvider');
 
@@ -19,7 +18,7 @@ export interface RecipesState {
   fetching: boolean,
   fetchingError?: Error | null,
   saving: boolean,
-  savingError?: Error | null,
+  mySavErr?: Error | null,
   saveRecipe?: SaveRecipeFn,
   deleteRecipe?: DeleteRecipeFn
 }
@@ -32,6 +31,7 @@ interface ActionProps {
 const initialState: RecipesState = {
   fetching: false,
   saving: false,
+  mySavErr: null
 };
 
 const FETCH_RECIPES_STARTED = 'FETCH_RECIPES_STARTED';
@@ -55,19 +55,17 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         addToStorage("recipes", payload.recipes);
         return { ...state, recipes: payload.recipes, fetching: false };
       case FETCH_RECIPES_SUCCEEDED_STORAGE:
-          log("in reducer from storage"+ JSON.stringify(payload.recipes[0]))
           addToStorage("recipes", payload.recipes);
           return { ...state, recipes: payload.recipes, fetching: false };
       case FETCH_RECIPES_FAILED:
         return { ...state, fetchingError: payload.error, fetching: false };
 
       case SAVE_RECIPE_STARTED:
-        return { ...state, savingError: null, saving: true };
+        return { ...state, mySavErr: null, saving: true };
       case SAVE_RECIPE_SUCCEEDED:
         const recipes = [...(state.recipes || [])];
         const recipe = payload.recipe;
         const index = recipes.findIndex(it => it._id === recipe._id);
-        //console.log(recipe)
         if (index === -1) {     
           recipes.splice(0, 0, recipe);
         } else {
@@ -76,10 +74,27 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         let recipes3: RecipeProps[] = [];
         recipes.forEach(x=>recipes3.push(x));
         log(recipes3);
+        alert("remote storage updated")
         addToStorage("recipes", recipes3);
         return { ...state, recipes:recipes3, saving: false };
       case SAVE_RECIPE_FAILED:
-        return { ...state, savingError: payload.error, saving: false };
+        const { error, recipe_original } =  payload.param
+    
+
+        log(error.message)
+        const recipes2 = [...(state.recipes || [])];
+        const index2 = recipes2.findIndex(it => it._id === recipe_original._id);
+        if (index2 === -1) {     
+          recipes2.splice(0, 0, recipe_original);
+        } else {
+          recipes2[index2] = recipe_original;
+        }
+        let recipes4: RecipeProps[] = [];
+        recipes2.forEach(x=>recipes4.push(x));
+        log(recipes4);
+        addToStorage("recipes", recipes4);
+        alert(error.message)
+        return { ...state, recipes: recipes4, mySavErr: error, saving: false };
 
       case DELETE_RECIPE_STARTED:
         return { ...state, fetching: true, fetchingError: null };
@@ -90,9 +105,13 @@ const reducer: (state: RecipesState, action: ActionProps) => RecipesState =
         const index1 = recipes1.findIndex(it => it._id === recipe1._id);
         recipes1.splice(index1, 1);
         addToStorage("recipes", recipes1);
+        alert("remote storage updated")
         return { ...state, recipes: recipes1, saving: false };
       case DELETE_RECIPE_FAILED:
-        return { ...state, fetchingError: payload.error, fetching: false };
+        const recipes7 = [...(state.recipes || [])];
+        const index7 = recipes7.findIndex(it => it._id === payload.id);
+        recipes7.splice(index7, 1);
+        return { ...state, recipes: recipes7, fetchingError: payload.error, fetching: false };
       default:
         return state;
     }
@@ -107,15 +126,15 @@ interface ItemProviderProps {
 
 export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
   const { token } = useContext(AuthContext);
-  const {networkStatus} = useNetwork();
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { recipes, fetching, fetchingError, saving, savingError } = state;
+  const { networkStatus } = useNetwork();
+  const  [state, dispatch ] = useReducer(reducer, initialState);
+  const { recipes, fetching, fetchingError, saving, mySavErr: mySavingError} = state;
   useEffect(getItemsEffect, [token]);
   useEffect(wsEffect, [token]);
-  const saveRecipe = useCallback<SaveRecipeFn>(saveRecipeCallback, [token]);
-  const deleteRecipe = useCallback<DeleteRecipeFn>(deleteRecipeCallback, [token]);
+  const saveRecipep = useCallback<SaveRecipeFn>(saveRecipeCallback, [token]);
+  const deleteRecipep = useCallback<DeleteRecipeFn>(deleteRecipeCallback, [token]);
 
-  const value = { recipes, fetching, fetchingError, saving, savingError, saveRecipe: saveRecipe, deleteRecipe };
+  const value = { recipes, fetching, fetchingError, saving, mySavingError, saveRecipe: saveRecipep, deleteRecipe: deleteRecipep };
   
   return (
     <RecipeContext.Provider value={value}>
@@ -124,10 +143,12 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
   );
 
   function getItemsEffect() {
-    //log("in get Items effect")
     let canceled = false;
     try{
-      fetchItems();
+      if (networkStatus.connected)
+        fetchItems();
+      else
+        fetchItemsFromStaroage(); 
     }catch (error){
       log("error: "+ error);
       fetchItemsFromStaroage(); 
@@ -182,7 +203,27 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
       //dispatch({ type: SAVE_RECIPE_SUCCEEDED, payload: { recipe: savedRecipe } });
     } catch (error) {
       log('saveRecipe failed');
-      dispatch({ type: SAVE_RECIPE_FAILED, payload: { error } });
+      var local_data: RecipeProps[] = await(getListFromStorage("local_data"))
+      log(local_data)
+      if (local_data){
+      var index = local_data.findIndex(it => it._id === recipe._id)
+      if (recipe._id)
+        recipe.location = 2
+      else
+        recipe.location = 1
+      if (index === -1)
+        local_data.splice(0,0,recipe)
+      else
+        local_data[index] = recipe
+      }
+     else{
+      local_data = []
+      local_data.splice(0,0,recipe)
+     }
+      addToStorage("local_data", local_data)
+      
+      var param = {error : error, recipe_original: recipe}
+      dispatch({ type: SAVE_RECIPE_FAILED, payload: { param } });
     }
   }
 
@@ -195,7 +236,17 @@ export const RecipesProvider: React.FC<ItemProviderProps> = ({ children }) => {
       //dispatch({ type: DELETE_RECIPE_SUCCEEDED, payload: { recipe: deletedRecipe } });
     } catch (error) {
       log('deleteRecipe failed');
-      dispatch({ type: DELETE_RECIPE_FAILED, payload: { error } });
+      var local_data: RecipeProps[] = await(getListFromStorage("local_data"))
+      var index = local_data.findIndex(it => it._id === id)
+     
+      if (index === -1){
+        local_data.splice(0,0,{_id: id, name:"", description: "", origin: "",likes:0, triedIt:false, date: new Date(),location:3})
+      }
+      else{
+        local_data[index].location = 3
+      }
+      addToStorage("local_data", local_data)
+      dispatch({ type: DELETE_RECIPE_FAILED, payload: { error, id } });
     }
   }
 

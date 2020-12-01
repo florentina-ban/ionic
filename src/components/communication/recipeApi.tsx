@@ -4,7 +4,7 @@ import { authConfig } from '../auth/authApi';
 import RecipeProps from '../list/RecipeProps';
 
 const log = getLogger('recipeApi');
-export const baseUrl = 'localhost:3000';
+export const baseUrl = '192.168.100.2:3000';
 
 const recipeUrl = `http://${baseUrl}/api/recipe`;
 

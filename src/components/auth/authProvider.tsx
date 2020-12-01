@@ -152,6 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         log('register succeeded');
         addToStorage('token', token);
         addToStorage('last_token',token);
+     
         setState({
           ...state,
           token,
@@ -215,6 +216,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             log('authenticate succeeded');
             addToStorage('token',token);
             addToStorage('last_token', token);
+         
             setState({
               ...state,
               token,

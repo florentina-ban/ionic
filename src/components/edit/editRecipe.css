@@ -1,13 +1,14 @@
 
 #cardContent{
     position: relative;
+    width: 80%;
 }
 .comboItem{
    display: inline-block;
    width: 50%;
  }
 ion-select {
-  width: 80%;
+  width: 90%;
 }
 ion-input.textRight{
   text-align: right !important;
@@ -21,7 +22,7 @@ ion-input.textRight{
 }
 #editRecipe{
   display: block;
-  width: 40%;
+  width:80%;
   margin: auto;
   margin-top: 1%;
 }

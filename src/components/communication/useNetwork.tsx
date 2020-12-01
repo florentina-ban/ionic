@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { NetworkStatus, Plugins } from '@capacitor/core';
+import { RecipeContext } from './RecipesProvider';
 
 const { Network } = Plugins;
 

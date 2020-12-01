@@ -14,7 +14,7 @@ interface RecipeEditProps extends RouteComponentProps<{
 const EditRecipe: React.FC<RecipeEditProps> = ({history, match}) =>  {
 
     const logger = getLogger("editRecipe");
-    const { recipes, saving, savingError, saveRecipe } = useContext(RecipeContext);
+    const { recipes, saving, mySavErr: mySavingError, saveRecipe } = useContext(RecipeContext);
     const [currentRecipe, setRecipe] = useState<RecipeProps>();
     const [description, setDescription ] =useState("");
     const [origin, setOrigin ] =useState("");
@@ -109,8 +109,8 @@ const onSaveRecipe = () => {
                         </IonItem>  
                         
                         <IonLoading isOpen={saving} />
-                            {savingError && (
-                            <div>{savingError.message || 'Failed to save item'}</div>
+                            {mySavingError && (
+                            <div>{mySavingError.message || 'Failed to save item'}</div>
                             )}
 
                         <div key="ButtonItem" id="buttonItem">

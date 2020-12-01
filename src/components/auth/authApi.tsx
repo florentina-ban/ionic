@@ -2,7 +2,7 @@ import axios from 'axios';
 import { config }from './../index';  
 import { withLogs } from './index';
 
-export const baseUrl = 'localhost:3000';
+export const baseUrl = '192.168.100.2:3000';
 const authUrl = `http://${baseUrl}/api/auth/login`;
 const registerUrl = `http://${baseUrl}/api/auth/signup`;
 
